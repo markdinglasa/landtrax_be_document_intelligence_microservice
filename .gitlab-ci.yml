@@ -1,0 +1,4 @@
+include:
+  - project: 'devops/centralized-pipeline/kubernetes'
+    ref: 'pipeline'
+    file: '/.gitlab-ci.yml'
