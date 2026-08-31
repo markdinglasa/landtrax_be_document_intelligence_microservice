@@ -1,11 +1,11 @@
 import { Column, Entity, OneToMany } from 'typeorm';
 import { ENTITY } from '../models/general-model';
-import { BaseEntity } from './general-entity';
+import { BaseEntity } from './general.entity';
 import TransactionEntity from './transaction.entity';
 import UserEntity from './user.entity';
 
 @Entity(ENTITY.REGISTRY_OF_DEED)
-export class RegistryOfDeedEntity extends BaseEntity {
+export default class RegistryOfDeedEntity extends BaseEntity {
   @Column({ name: 'Name', type: 'varchar', length: 255, nullable: false, unique: true })
   name!: string;
 

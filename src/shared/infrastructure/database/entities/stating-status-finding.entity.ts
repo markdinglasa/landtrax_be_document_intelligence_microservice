@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, OneToMany } from 'typeorm';
 import { ENTITY } from '../models/general-model';
-import { BaseEntity } from './general-entity';
+import { BaseEntity } from './general.entity';
 import TransactionServiceEntity from './transaction-service.entity';
 
 @Entity(ENTITY.STAGING_STATUS_FINDING)

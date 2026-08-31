@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PermissionGuard } from 'src/modules/authentication/utils/permission-guard';
-import { ServiceCatalogReportsQueryDto } from '../../dtos/service-catalog-reports-query.dto';
-import ReportsService from '../../services/reports-service';
+import { PermissionGuard } from 'src/shared/guards/permission.guard';
+import { ServiceCatalogReportsQueryDto } from 'src/domains/reports/application/dtos/service-catalog-reports-query.dto';
+import ReportsService from 'src/domains/reports/application/services/reports-service';
 import { ServiceCatalogReportsController } from '../service-catalog-reports-controller';
 
 describe('ServiceCatalogReportsController', () => {

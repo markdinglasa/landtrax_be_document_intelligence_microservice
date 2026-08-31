@@ -3,7 +3,7 @@ import { BusinessType } from 'src/shared/common/status';
 import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
 import { Entities } from '../models/general.model';
 import EntityCodeEntity from './entity-code.entity';
-import { BaseEntity } from './general-entity';
+import { BaseEntity } from './general.entity';
 import ProposalReferenceEntity from './proposal-reference.entity';
 import UserCompanyEntity from './user-company.entity';
 

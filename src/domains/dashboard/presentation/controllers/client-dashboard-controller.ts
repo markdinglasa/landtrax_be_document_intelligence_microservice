@@ -12,11 +12,11 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import * as common from 'src/shared/common';
-import { Audit } from 'src/modules/audit-trail/decorators/audit-decorator';
-import { AuditDescription } from 'src/modules/audit-trail/decorators/audit-description-decorator';
-import JwtAuthGuard from 'src/modules/authentication/utils/jwt-auth-guard';
+import { Audit } from 'src/shared/decorators/audit.decorator';
+import { AuditDescription } from 'src/shared/decorators/audit-description.decorator';
+import { GatewayUserGuard } from 'src/shared/guards/gateway-user.guard';
 import { ReqContext, RequestContextDto } from 'src/utils/req-context.decorator';
-import { DashboardService } from '../types';
+import { DashboardService } from '../../domain/types';
 
 function safeJsonParse(val: unknown): any {
   if (val === null || val === undefined) return null;
@@ -65,7 +65,7 @@ function mapWidget(w: any) {
 
 @ApiTags(common.API_TAGS.DASHBOARD)
 @ApiBearerAuth(common.API_SECURITY.JWT_AUTH)
-@UseGuards(JwtAuthGuard)
+@UseGuards(GatewayUserGuard)
 @Controller('client/dashboard')
 @Audit('Dashboard')
 export class ClientDashboardController {

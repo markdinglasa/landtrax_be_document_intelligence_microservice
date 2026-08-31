@@ -2,11 +2,11 @@ import { Controller, Get, Query, UseGuards, UsePipes, ValidationPipe } from '@ne
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import * as common from 'src/shared/common';
 import { AppPermission } from 'src/shared/common/permissions';
-import { Audit } from 'src/modules/audit-trail/decorators/audit-decorator';
-import { AuditDescription } from 'src/modules/audit-trail/decorators/audit-description-decorator';
-import { AnyPermission, PermissionRequired } from 'src/modules/authentication/decorators/authorization-decorators';
-import JwtAuthGuard from 'src/modules/authentication/utils/jwt-auth-guard';
-import { PermissionGuard } from 'src/modules/authentication/utils/permission-guard';
+import { Audit } from 'src/shared/decorators/audit.decorator';
+import { AuditDescription } from 'src/shared/decorators/audit-description.decorator';
+import { AnyPermission, PermissionRequired } from 'src/shared/decorators/authorization.decorators';
+import { GatewayUserGuard } from 'src/shared/guards/gateway-user.guard';
+import { PermissionGuard } from 'src/shared/guards/permission.guard';
 import { ReqContext, RequestContextDto } from 'src/utils/req-context.decorator';
 import { TransactionReportsQueryDto } from '../../application/dtos/transaction-reports-query.dto';
 import { TransactionReportsResponseDto } from '../../application/dtos/transaction-reports-response.dto';
@@ -16,7 +16,7 @@ import ReportsService from '../../application/services/reports-service';
 
 @ApiTags(common.API_TAGS.REPORTS)
 @ApiBearerAuth(common.API_SECURITY.JWT_AUTH)
-@UseGuards(JwtAuthGuard)
+@UseGuards(GatewayUserGuard)
 @Controller('reports/transactions')
 @Audit('Reports/Transactions')
 export class TransactionReportsController {

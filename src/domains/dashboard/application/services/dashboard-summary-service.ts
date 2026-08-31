@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import CollectionEntity from 'src/shared/infrastructure/database/entities/collection.entity';
 import DocumentEntity from 'src/shared/infrastructure/database/entities/document.entity';
-import { RegistryOfDeedEntity } from 'src/shared/infrastructure/database/entities/location';
+import RegistryOfDeedEntity from 'src/shared/infrastructure/database/entities/location';
 import StagingStatusEntity from 'src/shared/infrastructure/database/entities/staging-status.entity';
 import StagingEntity from 'src/shared/infrastructure/database/entities/staging.entity';
 import TransactionServiceEntity from 'src/shared/infrastructure/database/entities/transaction-service.entity';

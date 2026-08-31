@@ -1,24 +1,18 @@
+import { USER_TYPE, UserStatus } from 'src/shared/common/app-enums';
 import { mainRoleTransform } from 'src/utils';
 import { AfterLoad, Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { USER_TYPE } from '../common';
 import { ENTITY } from '../models/general-model';
-import type { UserModel } from '../models/masterfile-model';
-import { type UserStatus } from '../modules/user/types';
-import AddressEntity from './address-entity';
 import AuditTrailEntity from './audit-trail.entity';
-import CartEntity from './cart-entity';
 import DocumentEntity from './document.entity';
-import EmailTemplateRecipientEntity from './email-template-recipient-entity';
-import { LineEntity } from './general-entity';
-import { RegistryOfDeedEntity } from './location';
-import NotificationEntity from './notification-entity';
+import { LineEntity } from './general.entity';
+import RegistryOfDeedEntity from './location';
 import TransactionEntity from './transaction.entity';
 import UserCompanyEntity from './user-company.entity';
 import UserRoleEntity from './user-role.entity';
 import WidgetEntity from './widget.entity';
 
 @Entity(ENTITY.USER)
-export default class UserEntity extends LineEntity implements UserModel {
+export default class UserEntity extends LineEntity {
   @Column({ name: 'Preferences', type: 'text', nullable: true })
   preferences?: string | null;
 
@@ -160,21 +154,6 @@ export default class UserEntity extends LineEntity implements UserModel {
     eager: false,
   })
   userCompanies?: UserCompanyEntity[];
-
-  @OneToMany(() => NotificationEntity, (notification) => notification.user, {
-    eager: false,
-  })
-  notifications?: NotificationEntity[];
-
-  @OneToMany(
-    () => EmailTemplateRecipientEntity,
-    (emailTemplateRecipient) => emailTemplateRecipient.user,
-    {
-      eager: false,
-    },
-  )
-  emailTemplateRecipients?: EmailTemplateRecipientEntity[];
-
   @OneToMany(() => DocumentEntity, (document) => document.user, {
     eager: false,
   })
@@ -190,21 +169,11 @@ export default class UserEntity extends LineEntity implements UserModel {
   })
   widgets?: WidgetEntity[];
 
-  @OneToMany(() => AddressEntity, (addresses) => addresses.user, {
-    eager: false,
-  })
-  addresses?: AddressEntity[];
-
   @ManyToOne(() => RegistryOfDeedEntity, (registryOfDeed) => registryOfDeed.users, {
     eager: false,
   })
   @JoinColumn({ name: 'RegistryOfDeedId' })
   location?: RegistryOfDeedEntity;
-
-  @OneToMany(() => CartEntity, (cart) => cart.user, {
-    eager: false,
-  })
-  carts?: CartEntity[];
 
   @OneToMany(() => DocumentEntity, (document) => document.createdByUser, {
     eager: false,

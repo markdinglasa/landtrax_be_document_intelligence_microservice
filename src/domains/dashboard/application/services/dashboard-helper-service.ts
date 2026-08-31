@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DefaultRoles } from 'src/assets';
-import { USER_TYPE } from 'src/shared/common';
+import { DefaultRoles, USER_TYPE } from 'src/shared/common/app-enums';
 import CompanyEntity from 'src/shared/infrastructure/database/entities/company.entity';
 import UserCompanyEntity from 'src/shared/infrastructure/database/entities/user-company.entity';
 import UserEntity from 'src/shared/infrastructure/database/entities/user.entity';

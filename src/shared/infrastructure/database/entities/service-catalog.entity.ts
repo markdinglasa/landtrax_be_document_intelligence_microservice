@@ -1,8 +1,8 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { ENTITY } from '../models/general-model';
-import { CategoryEntity } from './category.entity';
-import { BaseEntity } from './general-entity';
-import RequirementMappingEntity from './requirement-mapping-entity';
+import CategoryEntity from './category.entity';
+import { BaseEntity } from './general.entity';
+import RequirementMappingEntity from './requirement-mapping.entity';
 import ServiceChecklistEntity from './service-checklist.entity';
 import TransactionServiceEntity from './transaction-service.entity';
 

@@ -1,7 +1,7 @@
 import { AfterLoad, Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { Entities } from '../models/general.model';
 import CollectionMethodEntity from './collection-method.entity';
-import { BaseEntity } from './general-entity';
+import { BaseEntity } from './general.entity';
 import TransactionEntity from './transaction.entity';
 
 @Entity(Entities.COLLECTION)

@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { Entities } from '../models/general.model';
 import CollectionEntity from './collection.entity';
-import { LineEntity } from './general-entity';
+import { LineEntity } from './general.entity';
 import PayTypeEntity from './pay-type.entity';
 
 @Entity(Entities.COLLECTION_METHOD)

@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { ENTITY } from '../models/general-model';
-import { LineEntity } from './general-entity';
+import { LineEntity } from './general.entity';
 import Role from './role.entity';
 import User from './user.entity';
 

@@ -2,17 +2,17 @@ import { Controller, Get, Query, UseGuards, UsePipes, ValidationPipe } from '@ne
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { API_SECURITY, API_TAGS } from 'src/shared/common';
 import { AppPermission } from 'src/shared/common/permissions';
-import { Audit } from 'src/modules/audit-trail/decorators/audit-decorator';
-import { AuditDescription } from 'src/modules/audit-trail/decorators/audit-description-decorator';
-import { PermissionRequired } from 'src/modules/authentication/decorators/authorization-decorators';
-import JwtAuthGuard from 'src/modules/authentication/utils/jwt-auth-guard';
-import { PermissionGuard } from 'src/modules/authentication/utils/permission-guard';
+import { Audit } from 'src/shared/decorators/audit.decorator';
+import { AuditDescription } from 'src/shared/decorators/audit-description.decorator';
+import { PermissionRequired } from 'src/shared/decorators/authorization.decorators';
+import { GatewayUserGuard } from 'src/shared/guards/gateway-user.guard';
+import { PermissionGuard } from 'src/shared/guards/permission.guard';
 import { ServiceCatalogReportsQueryDto } from '../../application/dtos/service-catalog-reports-query.dto';
 import ReportsService from '../../application/services/reports-service';
 
 @ApiTags(API_TAGS.REPORTS)
 @ApiBearerAuth(API_SECURITY.JWT_AUTH)
-@UseGuards(JwtAuthGuard)
+@UseGuards(GatewayUserGuard)
 @Controller('reports/service-catalogs')
 @Audit('Reports/ServiceCatalogs')
 export class ServiceCatalogReportsController {

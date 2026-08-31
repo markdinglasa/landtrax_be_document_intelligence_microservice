@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { ENTITY } from '../models/general-model';
-import { LineEntity } from './general-entity';
+import { LineEntity } from './general.entity';
 import RequirementEntity from './requirement.entity';
 import ServiceEntity from './service-catalog.entity';
 

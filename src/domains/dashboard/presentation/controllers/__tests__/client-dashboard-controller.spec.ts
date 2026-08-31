@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { DashboardService } from '../../types';
+import { DashboardService } from 'src/domains/dashboard/domain/types';
 import { ClientDashboardController } from '../client-dashboard-controller';
 
 describe('ClientDashboardController', () => {

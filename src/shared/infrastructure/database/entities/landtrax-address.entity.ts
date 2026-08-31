@@ -1,6 +1,6 @@
 import { Column, Entity } from 'typeorm';
 import { Entities } from '../models/general.model';
-import { BaseEntity } from './general-entity';
+import { BaseEntity } from './general.entity';
 
 @Entity(Entities.LANDTRAX_ADDRESS)
 export default class LandtraxAddressEntity extends BaseEntity {

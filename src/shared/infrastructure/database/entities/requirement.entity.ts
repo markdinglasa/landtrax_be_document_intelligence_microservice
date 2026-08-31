@@ -1,9 +1,10 @@
-import { ENTITY } from 'src/models/general-model';
+export type RequirementType = "DOCUMENT" | "INFORMATION";
+
+import { ENTITY } from '../models/general-model';
 import { Column, Entity, OneToMany } from 'typeorm';
-import { type RequirementType } from '../models/masterfile-model';
 import DocumentEntity from './document.entity';
-import { BaseEntity } from './general-entity';
-import RequirementMappingEntity from './requirement-mapping-entity';
+import { BaseEntity } from './general.entity';
+import RequirementMappingEntity from './requirement-mapping.entity';
 import ServiceChecklistEntity from './service-checklist.entity';
 
 @Entity(ENTITY.REQUIREMENT)

@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import EntityCodeEntity from 'src/shared/infrastructure/database/entities/entity-code.entity';
 import { Repository, SelectQueryBuilder } from 'typeorm';
-import { normalizeDateToFilter } from '../../../utils/date-utils';
+import { normalizeDateToFilter } from 'src/utils/date-utils';
 import { EntityCodeReportItemDto } from '../dtos/entity-code-report-item.dto';
 import { EntityCodeReportsQueryDto } from '../dtos/entity-code-reports-query.dto';
 import { EntityCodeReportsResponseDto } from '../dtos/entity-code-reports-response.dto';

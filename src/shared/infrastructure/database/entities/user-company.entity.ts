@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { ENTITY } from '../models/general-model';
 import CompanyEntity from './company.entity';
-import { LineEntity } from './general-entity';
+import { LineEntity } from './general.entity';
 import UserEntity from './user.entity';
 
 @Entity(ENTITY.USER_COMPANY)

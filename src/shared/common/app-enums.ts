@@ -197,3 +197,36 @@ export enum AnalyticsGroupBy {
   STATUS = 'status',
   MONTH = 'month',
 }
+
+export enum DefaultRoles {
+  SUPER_ADMIN = 'Super Admin',
+  EXECUTIVE_ADMIN = 'Executive Admin',
+  SYSTEM_ADMIN = 'System Admin',
+  SALES_OFFICER = 'Sales Officer',
+  SALES_COORDINATOR = 'Sales Coordinator',
+  SERVICE_DELIVERY_ADMIN = 'Service Delivery Admin',
+  CORPORATE_ADMIN = 'Corporate Admin',
+  CORPORATE_SUB_USER = 'Corporate Sub-user',
+  INDIVIDUAL = 'Individual',
+}
+
+/**
+ * User status enumeration
+ */
+export enum UserStatus {
+  PENDING = 'Pending',
+  ACTIVE = 'Active',
+  DISABLED = 'Disabled',
+  DEACTIVATED = 'Deactivated',
+  DORMANT = 'Dormant',
+  LOCKED = 'Locked',
+  REJECTED = 'Rejected',
+  PENDING_DELETION = 'Pending Deletion',
+}
+
+export enum TransactionType {
+  B2C = 'B2C',
+  B2B_SS_PO = 'B2B_SS_PO',
+  B2B_SS = 'B2B_SS',
+  B2B_ASSISTED_PO = 'B2B_ASSISTED_PO',
+}

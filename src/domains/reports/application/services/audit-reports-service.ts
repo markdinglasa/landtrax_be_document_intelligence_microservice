@@ -13,11 +13,11 @@ import AuditTrailEntity from 'src/shared/infrastructure/database/entities/audit-
 import UserEntity from 'src/shared/infrastructure/database/entities/user.entity';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
-import { EmailService } from '../../email/types';
+import { EmailService } from 'src/shared/contracts/email.service.abstract';
 import { AuditCsvGenerator, AuditExportRow } from '../../infrastructure/utils/audit-csv-generator';
 import { AuditXlsxGenerator } from '../../infrastructure/utils/audit-xlsx-generator';
 import { FileUtils } from '../../infrastructure/utils/file-utils';
-import S3StorageService from '../../storage/s3-storage-service';
+import S3StorageService from 'src/shared/infrastructure/storage/s3-storage-service';
 import { AuditReportsExportQueryDto } from '../dtos/audit-reports-export-query.dto';
 import {
     AuditExportJobStatusResponseDto,

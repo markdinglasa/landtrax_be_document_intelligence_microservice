@@ -1,6 +1,6 @@
 import { Column, Entity, OneToMany } from 'typeorm';
 import { ENTITY } from '../models/general-model';
-import { BaseEntity } from './general-entity';
+import { BaseEntity } from './general.entity';
 import StagingStatusEntity from './staging-status.entity';
 import TransactionServiceEntity from './transaction-service.entity';
 

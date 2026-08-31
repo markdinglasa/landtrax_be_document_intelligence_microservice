@@ -4,7 +4,7 @@ import { USER_TYPE } from 'src/shared/common';
 import LandtraxAddressEntity from 'src/shared/infrastructure/database/entities/landtrax-address.entity';
 import TransactionServiceEntity from 'src/shared/infrastructure/database/entities/transaction-service.entity';
 import UserEntity from 'src/shared/infrastructure/database/entities/user.entity';
-import { CourierReportsQueryDto } from '../../dtos/courier-reports-query.dto';
+import { CourierReportsQueryDto } from 'src/domains/reports/application/dtos/courier-reports-query.dto';
 import { CourierReportsService } from '../courier-reports-service';
 
 describe('CourierReportsService', () => {

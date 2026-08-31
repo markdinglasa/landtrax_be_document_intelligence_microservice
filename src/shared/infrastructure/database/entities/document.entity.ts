@@ -1,6 +1,6 @@
 import { AfterLoad, Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { Entities } from '../models/general.model';
-import { LineEntity } from './general-entity';
+import { LineEntity } from './general.entity';
 import RequirementEntity from './requirement.entity';
 import TransactionServiceEntity from './transaction-service.entity';
 import TransactionEntity from './transaction.entity';

@@ -1,6 +1,6 @@
 import { Column, Entity, OneToMany } from 'typeorm';
 import { Entities } from '../models/general.model';
-import { BaseEntity } from './general-entity';
+import { BaseEntity } from './general.entity';
 import ServiceEntity from './service-catalog.entity';
 
 @Entity(Entities.CATEGORY)

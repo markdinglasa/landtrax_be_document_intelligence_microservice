@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuditTrailService } from 'src/modules/audit-trail/types';
+import { DashboardService } from 'src/domains/dashboard/domain/types';
+import { AuditTrailService } from 'src/shared/contracts/audit-trail.service.abstract';
 import { RequestContextDto } from 'src/utils/req-context.decorator';
-import { DashboardService } from '../../types';
 import { AdminDashboardController } from '../admin-dashboard-controller';
 
 const mockReqContext: RequestContextDto = {

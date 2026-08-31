@@ -2,7 +2,7 @@ import { EntityCodeStatus } from 'src/shared/common/status';
 import { AfterLoad, Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 import { Entities } from '../models/general.model';
 import CompanyEntity from './company.entity';
-import { BaseEntity } from './general-entity';
+import { BaseEntity } from './general.entity';
 import ProposalReferenceEntity from './proposal-reference.entity';
 import UserEntity from './user.entity';
 

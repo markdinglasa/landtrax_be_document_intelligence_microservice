@@ -1,9 +1,8 @@
-import { ENTITY } from 'src/models/general-model';
+import { ENTITY } from '../models/general-model';
 import { AfterLoad, Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { type ProposalReferenceType } from '../models/masterfile-model';
 import CompanyEntity from './company.entity';
 import EntityCodeEntity from './entity-code.entity';
-import { BaseEntity } from './general-entity';
+import { BaseEntity } from './general.entity';
 import TransactionEntity from './transaction.entity';
 
 @Entity(ENTITY.PROPOSAL_REFERENCE)
@@ -15,7 +14,7 @@ export default class ProposalReferenceEntity extends BaseEntity {
   referenceNumber!: string;
 
   @Column({ name: 'Status', type: 'varchar', nullable: false })
-  status!: ProposalReferenceType;
+  status!: string;
 
   @Column({ name: 'EntityCodeId', type: 'varchar', nullable: true })
   entityCodeId!: string | null;

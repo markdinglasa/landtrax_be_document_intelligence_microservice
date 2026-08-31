@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import S3StorageService from 'src/modules/storage/s3-storage-service';
+import S3StorageService from 'src/shared/infrastructure/storage/s3-storage-service';
 import { CollectionStatus, CustomMeta, USER_TYPE } from 'src/shared/common';
-import FeedbackEntity from 'src/shared/infrastructure/database/entities/feedback-entity';
+import FeedbackEntity from 'src/shared/infrastructure/database/entities/feedback.entity';
 import TransactionServiceEntity from 'src/shared/infrastructure/database/entities/transaction-service.entity';
 import TransactionEntity from 'src/shared/infrastructure/database/entities/transaction.entity';
 import UserEntity from 'src/shared/infrastructure/database/entities/user.entity';

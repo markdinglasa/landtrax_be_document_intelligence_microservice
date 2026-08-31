@@ -1,6 +1,5 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DefaultRoles } from 'src/assets';
 import { CustomMeta, USER_TYPE } from 'src/shared/common';
 import LandtraxAddressEntity from 'src/shared/infrastructure/database/entities/landtrax-address.entity';
 import TransactionServiceEntity from 'src/shared/infrastructure/database/entities/transaction-service.entity';
@@ -24,7 +23,7 @@ export class CourierReportsService {
     queryBuilder: SelectQueryBuilder<TransactionServiceEntity>,
     user: UserEntity
   ) {
-    if (user.type === USER_TYPE.CORPORATE && user.mainRole === DefaultRoles.CORPORATE_ADMIN) {
+    if (user.type === USER_TYPE.CORPORATE && user.mainRole === 'Corporate Admin') {
       const userCompanyIds = user.userCompanies?.map((uc) => uc.companyId) || [];
       if (userCompanyIds.length > 0) {
         queryBuilder.andWhere(

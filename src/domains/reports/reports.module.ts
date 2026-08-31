@@ -1,3 +1,5 @@
+import { InternalHttpModule } from 'src/shared/infrastructure/http/internal-http.module';
+import { EmailService } from 'src/shared/contracts/email.service.abstract';
 import { Module } from '@nestjs/common';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -35,6 +37,7 @@ import { EntityCodeReportsController } from './presentation/controllers/entity-c
 import { ServiceCatalogReportsController } from './presentation/controllers/service-catalog-reports-controller';
 import { TransactionReportsController } from './presentation/controllers/transaction-reports-controller';
 import { UserReportsController } from './presentation/controllers/user-reports-controller';
+import S3StorageService from 'src/shared/infrastructure/storage/s3-storage-service';
 
 const domainServices = [
   AuditReportsService,
@@ -47,6 +50,7 @@ const domainServices = [
   UserReportsService,
   ServiceCatalogReportsService,
   CompanyScopeHelper,
+  S3StorageService,
 ];
 
 @Module({
@@ -69,6 +73,7 @@ const domainServices = [
       LandtraxAddressEntity,
     ]),
     ThrottlerModule,
+    InternalHttpModule,
   ],
   controllers: [
     CollectionsReportsController,

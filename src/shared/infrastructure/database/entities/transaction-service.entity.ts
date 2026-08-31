@@ -2,7 +2,7 @@ import { AfterLoad, Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typ
 import { Entities } from '../models/general.model';
 import CourierProviderEntity from './courier-provider.entity';
 import DocumentEntity from './document.entity';
-import { BaseEntity } from './general-entity';
+import { BaseEntity } from './general.entity';
 import ServiceEntity from './service-catalog.entity';
 import StagingStatusEntity from './staging-status.entity';
 import StagingEntity from './staging.entity';

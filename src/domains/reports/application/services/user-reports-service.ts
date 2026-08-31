@@ -1,13 +1,12 @@
 import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DefaultRoles } from 'src/assets';
-import { UserStatus } from 'src/modules/user/types';
+import { UserStatus } from 'src/shared/common/app-enums';
 import { CustomMeta } from 'src/shared/common';
 import AuditTrailEntity from 'src/shared/infrastructure/database/entities/audit-trail.entity';
 import UserEntity from 'src/shared/infrastructure/database/entities/user.entity';
 import { foramtPhoneNumber, mainRoleTransform } from 'src/utils';
 import { Repository, SelectQueryBuilder } from 'typeorm';
-import { USER_TYPE } from '../../../common/app-enums';
+import { USER_TYPE } from 'src/shared/common/app-enums';
 import { UserReportsQueryDto } from '../dtos/user-reports-query.dto';
 import { UserReportsSummaryQueryDto } from '../dtos/user-reports-summary-query.dto';
 import { CompanyScopeHelper } from './shared/company-scope-helper';
@@ -259,9 +258,9 @@ export class UserReportsService {
       }
 
       const data = users.map((user) => {
-        const type = user?.userRoles?.some((ur) => ur?.role?.name === DefaultRoles.CORPORATE_ADMIN)
-          ? DefaultRoles.CORPORATE_ADMIN
-          : DefaultRoles.CORPORATE_SUB_USER;
+        const type = user?.userRoles?.some((ur) => ur?.role?.name === 'Corporate Admin')
+          ? 'Corporate Admin'
+          : 'Corporate Sub-user';
         return {
           id: user.id,
           name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),

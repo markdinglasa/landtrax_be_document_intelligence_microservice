@@ -1,10 +1,15 @@
+import { CollectionStatus, TransactionType, USER_TYPE } from 'src/shared/common/app-enums';
+import { formatToUserDate } from 'src/utils/date-utils';
 import { AfterLoad, Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { Entities } from '../models/general.model';
 import CollectionEntity from './collection.entity';
 import DocumentEntity from './document.entity';
-import { BaseEntity } from './general-entity';
-import { RegistryOfDeedEntity } from './location';
+import FeedbackEntity from './feedback.entity';
+import { BaseEntity } from './general.entity';
+import RegistryOfDeedEntity from './location';
+import MayaCheckoutEntity from './maya-checkout.entity';
 import ProposalReferenceEntity from './proposal-reference.entity';
+import RecipientEntity from './recipient.entity';
 import StagingEntity from './staging.entity';
 import TransactionServiceEntity from './transaction-service.entity';
 import UserEntity from './user.entity';
@@ -185,24 +190,12 @@ export default class TransactionEntity extends BaseEntity {
   })
   feedbacks?: FeedbackEntity[];
 
-  @OneToMany(() => CartEntity, (cart) => cart.transaction, {
-    eager: false,
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
-  carts?: CartEntity[];
-
   @ManyToOne(() => ProposalReferenceEntity, (proposalReference) => proposalReference.transaction, {
     eager: false,
     createForeignKeyConstraints: false, // ReferenceNumber is no longer unique; maintain association via column only
   })
   @JoinColumn({ name: 'ProposalReferenceNumber', referencedColumnName: 'referenceNumber' })
   proposalReference?: ProposalReferenceEntity;
-
-  @OneToMany(() => TransactionHistoryEntity, (history) => history.transaction, {
-    eager: false,
-  })
-  history?: TransactionHistoryEntity[];
 
   @OneToMany(() => RecipientEntity, (recipient) => recipient.transaction, {
     eager: false,

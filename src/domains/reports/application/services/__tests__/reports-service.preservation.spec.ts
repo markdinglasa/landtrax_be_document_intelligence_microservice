@@ -14,8 +14,8 @@ import TransactionServiceEntity from 'src/shared/infrastructure/database/entitie
 import TransactionEntity from 'src/shared/infrastructure/database/entities/transaction.entity';
 import UserCompanyEntity from 'src/shared/infrastructure/database/entities/user-company.entity';
 import UserEntity from 'src/shared/infrastructure/database/entities/user.entity';
-import { EmailService } from '../../../email/types';
-import S3StorageService from '../../../storage/s3-storage-service';
+import { EmailService } from 'src/shared/contracts/email.service.abstract';
+import S3StorageService from 'src/shared/infrastructure/storage/s3-storage-service';
 import { AuditExportRateLimitService } from '../audit-export-rate-limit.service';
 import { AuditReportsService } from '../audit-reports-service';
 import { CollectionsReportsService } from '../collections-reports-service';

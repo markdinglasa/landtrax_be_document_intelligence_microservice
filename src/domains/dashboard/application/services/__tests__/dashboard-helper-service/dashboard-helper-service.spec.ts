@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { USER_TYPE } from 'src/shared/common';
+
+import { USER_TYPE } from 'src/shared/common/app-enums';
 import UserCompanyEntity from 'src/shared/infrastructure/database/entities/user-company.entity';
 import UserEntity from 'src/shared/infrastructure/database/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -8,8 +9,7 @@ import { DashboardHelperService } from '../../dashboard-helper-service';
 
 const mockReqContext = { userId: '1', ip: '127.0.0.1', userAgent: 'test-agent' } as any;
 
-describe('DashboardHelperService', () => { 
-  
+describe('DashboardHelperService', () => {
   let service: DashboardHelperService;
   let userCompanyRepo: jest.Mocked<Repository<UserCompanyEntity>>;
   let userRepo: jest.Mocked<Repository<UserEntity>>;
@@ -51,8 +51,7 @@ describe('DashboardHelperService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('safeJsonParse', () => { 
-  
+  describe('safeJsonParse', () => {
     it('should return null for null/undefined', () => {
       expect(service.safeJsonParse(null)).toBeNull();
       expect(service.safeJsonParse(undefined)).toBeNull();
@@ -72,8 +71,7 @@ describe('DashboardHelperService', () => {
     });
   });
 
-  describe('normalizeWidgetNamespace', () => { 
-  
+  describe('normalizeWidgetNamespace', () => {
     it('should return dto if no namespace provided', () => {
       const dto = { title: 'Test' };
       expect(service.normalizeWidgetNamespace(dto)).toBe(dto);
@@ -99,8 +97,7 @@ describe('DashboardHelperService', () => {
     });
   });
 
-  describe('widgetMatchesNamespace', () => { 
-  
+  describe('widgetMatchesNamespace', () => {
     it('should return true if no namespace provided', () => {
       const widget = { filter: '{"namespace":"ADMIN"}' } as any;
       expect(service.widgetMatchesNamespace(widget)).toBe(true);
@@ -119,8 +116,7 @@ describe('DashboardHelperService', () => {
     });
   });
 
-  describe('serializeNullable', () => { 
-  
+  describe('serializeNullable', () => {
     it('should handle null/undefined', () => {
       expect(service.serializeNullable(null)).toBeNull();
       expect(service.serializeNullable(undefined)).toBeNull();
@@ -134,8 +130,7 @@ describe('DashboardHelperService', () => {
     });
   });
 
-  describe('getEffectiveRange', () => { 
-  
+  describe('getEffectiveRange', () => {
     it('should use default from and to if not provided', () => {
       const res = service.getEffectiveRange();
       expect(res.from).toBe('1900-01-01');
@@ -148,8 +143,7 @@ describe('DashboardHelperService', () => {
     });
   });
 
-  describe('getCompanyIdForUser', () => { 
-  
+  describe('getCompanyIdForUser', () => {
     it('should return companyId if found', async () => {
       userCompanyRepo.findOne.mockResolvedValue({ companyId: 'comp-1' } as any);
       const res = await service.getCompanyIdForUser('user-1');
@@ -157,8 +151,7 @@ describe('DashboardHelperService', () => {
     });
   });
 
-  describe('resolveUserScope', () => { 
-  
+  describe('resolveUserScope', () => {
     it('should return all users if isAdmin and no companyId', async () => {
       userRepo.findOne.mockResolvedValueOnce({
         id: 'u1',
@@ -214,8 +207,7 @@ describe('DashboardHelperService', () => {
     });
   });
 
-  describe('resolveCompanyIdByName', () => { 
-  
+  describe('resolveCompanyIdByName', () => {
     it('should return null if no companyName', async () => {
       expect(await service.resolveCompanyIdByName('')).toBeNull();
     });

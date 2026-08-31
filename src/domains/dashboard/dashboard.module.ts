@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuditTrailModule } from 'src/modules/audit-trail/audit-trail-module';
+import { InternalHttpModule } from 'src/shared/infrastructure/http/internal-http.module';
 import CollectionEntity from 'src/shared/infrastructure/database/entities/collection.entity';
 import DocumentEntity from 'src/shared/infrastructure/database/entities/document.entity';
 import ServiceEntity from 'src/shared/infrastructure/database/entities/service-catalog.entity';
@@ -19,7 +19,7 @@ import { DashboardSummaryService } from './application/services/dashboard-summar
 import { DashboardWidgetService } from './application/services/dashboard-widget-service';
 import { AdminDashboardController } from './presentation/controllers/admin-dashboard-controller';
 import { ClientDashboardController } from './presentation/controllers/client-dashboard-controller';
-import { DashboardService } from './types';
+import { DashboardService } from './domain/types';
 
 @Module({
   imports: [
@@ -35,7 +35,7 @@ import { DashboardService } from './types';
       UserEntity,
     ]),
     ThrottlerModule,
-    AuditTrailModule,
+    InternalHttpModule,
   ],
   controllers: [ClientDashboardController, AdminDashboardController],
   providers: [

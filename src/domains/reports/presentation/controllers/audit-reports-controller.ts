@@ -1,3 +1,9 @@
+import { AuditDescription } from "src/shared/decorators/audit-description.decorator";
+import { PermissionGuard } from "src/shared/guards/permission.guard";
+import { PermissionRequired } from "src/shared/decorators/authorization.decorators";
+import { ReqContext, RequestContextDto } from "src/utils/req-context.decorator";
+import { AppPermission } from "src/shared/common";
+
 import {
   Controller,
   Get,
@@ -10,6 +16,9 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { API_SECURITY, API_TAGS } from 'src/shared/common';
+import { Audit } from 'src/shared/decorators/audit.decorator';
+import { GatewayUserGuard } from 'src/shared/guards/gateway-user.guard';
 import { AuditReportsExportQueryDto } from '../../application/dtos/audit-reports-export-query.dto';
 import {
   AuditExportJobStatusResponseDto,
@@ -21,14 +30,14 @@ import ReportsService from '../../application/services/reports-service';
 
 @ApiTags(API_TAGS.REPORTS)
 @ApiBearerAuth(API_SECURITY.JWT_AUTH)
-@UseGuards(JwtAuthGuard)
+@UseGuards(GatewayUserGuard)
 @Controller('reports/audit')
 @Audit('Reports/Audit')
 export class AuditReportsController {
   constructor(private readonly _reportsService: ReportsService) {}
 
   @Get()
-  @UseGuards(AdminAuthGuard)
+  
   @UseGuards(PermissionGuard)
   @PermissionRequired(AppPermission.VIEW_AUDIT_TRAIL_REPORTS)
   @AuditDescription('Reviewed regulatory compliance and system activity audit reports')
@@ -38,7 +47,7 @@ export class AuditReportsController {
   }
 
   @Get('export')
-  @UseGuards(AdminAuthGuard)
+  
   @UseGuards(PermissionGuard)
   @PermissionRequired(AppPermission.VIEW_AUDIT_TRAIL_REPORTS)
   @ApiOperation({
@@ -58,7 +67,7 @@ export class AuditReportsController {
   }
 
   @Get('export/job/:jobId')
-  @UseGuards(AdminAuthGuard)
+  
   @UseGuards(PermissionGuard)
   @PermissionRequired(AppPermission.VIEW_AUDIT_TRAIL_REPORTS)
   @ApiOperation({ summary: 'Poll the status of an async audit log export job' })
@@ -71,7 +80,7 @@ export class AuditReportsController {
   }
 
   @Post('export/job/:jobId/retry')
-  @UseGuards(AdminAuthGuard)
+  
   @UseGuards(PermissionGuard)
   @PermissionRequired(AppPermission.VIEW_AUDIT_TRAIL_REPORTS)
   @ApiOperation({ summary: 'Retry a failed async audit log export job' })
@@ -87,7 +96,7 @@ export class AuditReportsController {
   }
 
   @Get('actions')
-  @UseGuards(AdminAuthGuard)
+  
   @UseGuards(PermissionGuard)
   @PermissionRequired(AppPermission.VIEW_AUDIT_TRAIL_REPORTS)
   @ApiOperation({ summary: 'Get distinct action types for the audit reports filter' })
@@ -99,7 +108,7 @@ export class AuditReportsController {
   }
 
   @Get('resources')
-  @UseGuards(AdminAuthGuard)
+  
   @UseGuards(PermissionGuard)
   @PermissionRequired(AppPermission.VIEW_AUDIT_TRAIL_REPORTS)
   @ApiOperation({ summary: 'Get distinct resource/entity types for the audit reports filter' })

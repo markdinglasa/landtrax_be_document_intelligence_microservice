@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, OneToMany } from 'typeorm';
 import { Entities } from '../models/general.model';
 import CollectionMethodEntity from './collection-method.entity';
-import { BaseEntity } from './general-entity';
+import { BaseEntity } from './general.entity';
 
 @Entity(Entities.PAY_TYPE)
 export default class PayTypeEntity extends BaseEntity {

@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DefaultRoles } from 'src/assets';
-import S3StorageService from 'src/modules/storage/s3-storage-service';
+import S3StorageService from 'src/shared/infrastructure/storage/s3-storage-service';
 import { CustomMeta } from 'src/shared/common';
 import CollectionMethodEntity from 'src/shared/infrastructure/database/entities/collection-method.entity';
 import CollectionEntity from 'src/shared/infrastructure/database/entities/collection.entity';
@@ -10,7 +9,7 @@ import TransactionServiceEntity from 'src/shared/infrastructure/database/entitie
 import TransactionEntity from 'src/shared/infrastructure/database/entities/transaction.entity';
 import UserEntity from 'src/shared/infrastructure/database/entities/user.entity';
 import { Brackets, IsNull, Repository, SelectQueryBuilder } from 'typeorm';
-import { CollectionStatus, USER_TYPE } from '../../../common/app-enums';
+import { CollectionStatus, USER_TYPE } from 'src/shared/common/app-enums';
 import { FileUtils } from '../../infrastructure/utils/file-utils';
 import { CollectionsReportsExportQueryDto } from '../dtos/collections-reports-export-query.dto';
 import { CollectionsReportsExportResponseDto } from '../dtos/collections-reports-export-response.dto';
@@ -157,7 +156,7 @@ export class CollectionsReportsService {
       const userCompanyIds = user.userCompanies?.map((uc) => uc.companyId) || [];
       const isCorpAdmin: boolean =
         user?.userRoles?.some((ur) => {
-          return ur?.role?.name === (DefaultRoles.CORPORATE_ADMIN as string);
+          return ur?.role?.name === ('Corporate Admin' as string);
         }) || false;
 
       if (user.type !== USER_TYPE.ADMINISTRATOR) {

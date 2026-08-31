@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { ChartType, type WidgetSize, type WidgetType } from '../../../common/wdigets';
 import { Entities } from '../models/general.model';
-import { BaseEntity } from './general-entity';
+import { BaseEntity } from './general.entity';
 import UserEntity from './user.entity';
 
 @Entity(Entities.WIDGET)
