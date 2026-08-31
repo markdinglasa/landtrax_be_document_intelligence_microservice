@@ -1,33 +1,33 @@
 import {
-  BadRequestException,
-  HttpException,
-  Inject,
-  Injectable,
-  Logger,
-  NotFoundException,
+    BadRequestException,
+    HttpException,
+    Inject,
+    Injectable,
+    Logger,
+    NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { USER_TYPE } from 'src/shared/common';
+import AuditExportJobEntity from 'src/shared/infrastructure/database/entities/audit-export-job.entity';
+import AuditTrailEntity from 'src/shared/infrastructure/database/entities/audit-trail.entity';
+import UserEntity from 'src/shared/infrastructure/database/entities/user.entity';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
-import { USER_TYPE } from 'src/shared/common';
-import AuditExportJobEntity from 'src/shared/infrastructure/database/entities/audit-export-job-entity';
-import AuditTrailEntity from 'src/shared/infrastructure/database/entities/audit-trail-entity';
-import UserEntity from 'src/shared/infrastructure/database/entities/user-entity';
 import { EmailService } from '../../email/types';
-import S3StorageService from '../../storage/s3-storage-service';
-import { AuditReportsExportQueryDto } from '../dtos/audit-reports-export-query.dto';
-import {
-  AuditExportJobStatusResponseDto,
-  AuditReportsExportResponseDto,
-} from '../dtos/audit-reports-export-response.dto';
-import { AuditReportsQueryDto } from '../dtos/audit-reports-query.dto';
-import { AuditReportsResponseDto } from '../dtos/audit-reports-response.dto';
 import { AuditCsvGenerator, AuditExportRow } from '../../infrastructure/utils/audit-csv-generator';
 import { AuditXlsxGenerator } from '../../infrastructure/utils/audit-xlsx-generator';
 import { FileUtils } from '../../infrastructure/utils/file-utils';
+import S3StorageService from '../../storage/s3-storage-service';
+import { AuditReportsExportQueryDto } from '../dtos/audit-reports-export-query.dto';
 import {
-  AuditExportRateLimitService,
-  LARGE_EXPORT_THRESHOLD,
+    AuditExportJobStatusResponseDto,
+    AuditReportsExportResponseDto,
+} from '../dtos/audit-reports-export-response.dto';
+import { AuditReportsQueryDto } from '../dtos/audit-reports-query.dto';
+import { AuditReportsResponseDto } from '../dtos/audit-reports-response.dto';
+import {
+    AuditExportRateLimitService,
+    LARGE_EXPORT_THRESHOLD,
 } from './audit-export-rate-limit.service';
 
 @Injectable()

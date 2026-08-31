@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import ServiceEntity from 'src/shared/infrastructure/database/entities/service-catalog.entity';
 import { formatToUserDate } from 'src/utils/date-utils';
 import { Repository, SelectQueryBuilder } from 'typeorm';
-import ServiceEntity from 'src/shared/infrastructure/database/entities/service-entity';
 import { ServiceCatalogReportItemDto } from '../dtos/service-catalog-report-item.dto';
 import { ServiceCatalogReportsQueryDto } from '../dtos/service-catalog-reports-query.dto';
 import { ServiceCatalogReportsResponseDto } from '../dtos/service-catalog-reports-response.dto';

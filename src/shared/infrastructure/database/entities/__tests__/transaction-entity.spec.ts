@@ -1,5 +1,5 @@
-import TransactionEntity from '../transaction-entity';
-import TransactionServiceEntity from '../transaction-service-entity';
+import TransactionServiceEntity from '../transaction-service.entity';
+import TransactionEntity from '../transaction.entity';
 
 describe('TransactionEntity', () => {
   let transaction: TransactionEntity;

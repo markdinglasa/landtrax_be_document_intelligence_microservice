@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import ServiceEntity from 'src/shared/infrastructure/database/entities/service-catalog.entity';
 import { Repository } from 'typeorm';
-import ServiceEntity from 'src/shared/infrastructure/database/entities/service-entity';
 import { ServiceCatalogReportsService } from '../service-catalog-reports-service';
 
 const mockReqContext = { userId: '1', ip: '127.0.0.1', userAgent: 'test-agent' } as any;

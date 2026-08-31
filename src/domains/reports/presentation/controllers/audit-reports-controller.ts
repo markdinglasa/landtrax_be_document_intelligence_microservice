@@ -10,15 +10,6 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { API_SECURITY, API_TAGS } from 'src/shared/common';
-import { AppPermission } from 'src/shared/common/permissions';
-import { Audit } from 'src/modules/audit-trail/decorators/audit-decorator';
-import { AuditDescription } from 'src/modules/audit-trail/decorators/audit-description-decorator';
-import { PermissionRequired } from 'src/modules/authentication/decorators/authorization-decorators';
-import AdminAuthGuard from 'src/modules/authentication/utils/admin-auth-guard';
-import JwtAuthGuard from 'src/modules/authentication/utils/jwt-auth-guard';
-import { PermissionGuard } from 'src/modules/authentication/utils/permission-guard';
-import { ReqContext, RequestContextDto } from 'src/utils/req-context.decorator';
 import { AuditReportsExportQueryDto } from '../../application/dtos/audit-reports-export-query.dto';
 import {
   AuditExportJobStatusResponseDto,

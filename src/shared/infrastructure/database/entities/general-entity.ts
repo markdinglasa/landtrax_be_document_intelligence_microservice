@@ -8,7 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { BaseModel, LineModel } from '../models/general-model';
-import type UserEntity from './user-entity';
+import type UserEntity from './user.entity';
 
 export class BaseEntity implements BaseModel {
   @PrimaryGeneratedColumn('uuid', { name: 'Id' })

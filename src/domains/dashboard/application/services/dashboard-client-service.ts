@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import CollectionEntity from 'src/shared/infrastructure/database/entities/collection-entity';
-import ServiceEntity from 'src/shared/infrastructure/database/entities/service-entity';
+import CollectionEntity from 'src/shared/infrastructure/database/entities/collection.entity';
+import ServiceEntity from 'src/shared/infrastructure/database/entities/service-catalog.entity';
 import { IsNull, Repository } from 'typeorm';
 import { DateRange } from '../../domain/types';
 import { DashboardHelperService } from './dashboard-helper-service';

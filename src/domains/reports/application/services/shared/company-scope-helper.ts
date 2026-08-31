@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import UserCompanyEntity from 'src/shared/infrastructure/database/entities/user-company.entity';
 import { Repository } from 'typeorm';
-import UserCompanyEntity from 'src/shared/infrastructure/database/entities/user-company-entity';
 
 @Injectable()
 export class CompanyScopeHelper {

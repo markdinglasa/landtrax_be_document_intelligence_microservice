@@ -1,5 +1,5 @@
 import { IncomingMessage } from 'node:http';
-import UserEntity from 'src/shared/infrastructure/database/entities/user-entity';
+import UserEntity from 'src/shared/infrastructure/database/entities/user.entity';
 
 export interface LoggerRequest extends IncomingMessage {
   user: UserEntity;

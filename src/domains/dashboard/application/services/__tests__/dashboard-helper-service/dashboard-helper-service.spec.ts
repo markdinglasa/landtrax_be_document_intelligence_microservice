@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { USER_TYPE } from 'src/shared/common';
-import UserCompanyEntity from 'src/shared/infrastructure/database/entities/user-company-entity';
-import UserEntity from 'src/shared/infrastructure/database/entities/user-entity';
+import UserCompanyEntity from 'src/shared/infrastructure/database/entities/user-company.entity';
+import UserEntity from 'src/shared/infrastructure/database/entities/user.entity';
 import { Repository } from 'typeorm';
 import { DashboardHelperService } from '../../dashboard-helper-service';
 

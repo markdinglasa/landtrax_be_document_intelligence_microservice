@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import CollectionEntity from 'src/shared/infrastructure/database/entities/collection-entity';
-import DocumentEntity from 'src/shared/infrastructure/database/entities/document-entity';
-import StagingEntity from 'src/shared/infrastructure/database/entities/staging-entity';
-import TransactionEntity from 'src/shared/infrastructure/database/entities/transaction-entity';
-import TransactionServiceEntity from 'src/shared/infrastructure/database/entities/transaction-service-entity';
+import CollectionEntity from 'src/shared/infrastructure/database/entities/collection.entity';
+import DocumentEntity from 'src/shared/infrastructure/database/entities/document.entity';
+import StagingEntity from 'src/shared/infrastructure/database/entities/staging.entity';
+import TransactionServiceEntity from 'src/shared/infrastructure/database/entities/transaction-service.entity';
+import TransactionEntity from 'src/shared/infrastructure/database/entities/transaction.entity';
 import { Repository } from 'typeorm';
 import { DashboardHelperService } from '../../dashboard-helper-service';
 import { DashboardSummaryService } from '../../dashboard-summary-service';

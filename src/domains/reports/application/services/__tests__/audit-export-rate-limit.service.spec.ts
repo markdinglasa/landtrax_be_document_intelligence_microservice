@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import AuditExportJobEntity from 'src/shared/infrastructure/database/entities/audit-export-job-entity';
+import AuditExportJobEntity from 'src/shared/infrastructure/database/entities/audit-export-job.entity';
 import {
-  AuditExportRateLimitService,
-  LARGE_EXPORT_HOURLY_LIMIT,
-  LARGE_EXPORT_THRESHOLD,
+    AuditExportRateLimitService,
+    LARGE_EXPORT_HOURLY_LIMIT,
+    LARGE_EXPORT_THRESHOLD,
 } from '../audit-export-rate-limit.service';
 
 const mockReqContext = { userId: '1', ip: '127.0.0.1', userAgent: 'test-agent' } as any;

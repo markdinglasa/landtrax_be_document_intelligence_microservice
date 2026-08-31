@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { CategoryEntity } from 'src/shared/infrastructure/database/entities/category-entity';
+import { CategoryEntity } from 'src/shared/infrastructure/database/entities/category.entity';
 
 export class ServiceCatalogReportItemDto {
   @ApiProperty()

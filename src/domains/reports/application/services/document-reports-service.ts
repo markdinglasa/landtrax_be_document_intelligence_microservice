@@ -1,10 +1,10 @@
 import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { USER_TYPE } from 'src/shared/common';
-import UserEntity from 'src/shared/infrastructure/database/entities/user-entity';
+import DocumentEntity from 'src/shared/infrastructure/database/entities/document.entity';
+import UserEntity from 'src/shared/infrastructure/database/entities/user.entity';
 import { formatFileType } from 'src/utils';
 import { IsNull, Repository, SelectQueryBuilder } from 'typeorm';
-import DocumentEntity from 'src/shared/infrastructure/database/entities/document-entity';
 import { DocumentReportsQueryDto } from '../dtos/document-reports-query.dto';
 import { DocumentReportsResponseDto } from '../dtos/document-reports-response.dto';
 import { CompanyScopeHelper } from './shared/company-scope-helper';

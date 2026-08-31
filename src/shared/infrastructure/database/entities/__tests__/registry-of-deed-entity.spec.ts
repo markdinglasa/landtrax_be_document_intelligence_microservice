@@ -1,4 +1,4 @@
-import { RegistryOfDeedEntity } from '../registry-of-deed-entity';
+import { RegistryOfDeedEntity } from '../location';
 
 describe('RegistryOfDeedEntity', () => {
   it('should create an instance of RegistryOfDeedEntity', () => {

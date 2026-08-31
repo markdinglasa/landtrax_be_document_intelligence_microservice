@@ -1,4 +1,4 @@
-import WidgetEntity from 'src/shared/infrastructure/database/entities/widget-entity';
+import WidgetEntity from 'src/shared/infrastructure/database/entities/widget.entity';
 
 export interface DateRange {
   from?: string;

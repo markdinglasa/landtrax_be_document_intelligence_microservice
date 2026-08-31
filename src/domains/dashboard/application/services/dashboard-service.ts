@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import WidgetEntity from 'src/shared/infrastructure/database/entities/widget-entity';
+import WidgetEntity from 'src/shared/infrastructure/database/entities/widget.entity';
 import { DashboardNamespace, DashboardService, DateRange } from '../../domain/types';
 import { DashboardAdminService } from './dashboard-admin-service';
 import { DashboardClientService } from './dashboard-client-service';

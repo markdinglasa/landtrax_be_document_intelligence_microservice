@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ChartType, WidgetSize, WidgetType } from 'src/shared/common';
-import WidgetEntity from 'src/shared/infrastructure/database/entities/widget-entity';
+import WidgetEntity from 'src/shared/infrastructure/database/entities/widget.entity';
 import { IsNull, Repository } from 'typeorm';
 import { DashboardNamespace } from '../../domain/types';
 import { DashboardHelperService } from './dashboard-helper-service';

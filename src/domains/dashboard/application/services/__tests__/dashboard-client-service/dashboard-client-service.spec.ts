@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import CollectionEntity from 'src/shared/infrastructure/database/entities/collection-entity';
-import ServiceEntity from 'src/shared/infrastructure/database/entities/service-entity';
+import CollectionEntity from 'src/shared/infrastructure/database/entities/collection.entity';
+import ServiceEntity from 'src/shared/infrastructure/database/entities/service-catalog.entity';
 import { Repository } from 'typeorm';
 import { DashboardClientService } from '../../dashboard-client-service';
 import { DashboardHelperService } from '../../dashboard-helper-service';

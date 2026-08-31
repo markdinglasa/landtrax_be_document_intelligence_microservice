@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import AuditExportJobEntity from 'src/shared/infrastructure/database/entities/audit-export-job.entity';
 import { Repository } from 'typeorm';
-import AuditExportJobEntity from 'src/shared/infrastructure/database/entities/audit-export-job-entity';
 
 /** Rolling-window threshold (records) that classifies an export as "large-scale" */
 export const LARGE_EXPORT_THRESHOLD = 10_000;

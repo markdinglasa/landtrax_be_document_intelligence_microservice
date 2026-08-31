@@ -1,13 +1,13 @@
 import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DefaultRoles } from 'src/assets';
-import { CustomMeta } from 'src/shared/common';
 import { UserStatus } from 'src/modules/user/types';
+import { CustomMeta } from 'src/shared/common';
+import AuditTrailEntity from 'src/shared/infrastructure/database/entities/audit-trail.entity';
+import UserEntity from 'src/shared/infrastructure/database/entities/user.entity';
 import { foramtPhoneNumber, mainRoleTransform } from 'src/utils';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { USER_TYPE } from '../../../common/app-enums';
-import AuditTrailEntity from 'src/shared/infrastructure/database/entities/audit-trail-entity';
-import UserEntity from 'src/shared/infrastructure/database/entities/user-entity';
 import { UserReportsQueryDto } from '../dtos/user-reports-query.dto';
 import { UserReportsSummaryQueryDto } from '../dtos/user-reports-summary-query.dto';
 import { CompanyScopeHelper } from './shared/company-scope-helper';

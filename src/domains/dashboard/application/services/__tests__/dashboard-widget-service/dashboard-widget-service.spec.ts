@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import WidgetEntity from 'src/shared/infrastructure/database/entities/widget.entity';
 import { Repository } from 'typeorm';
-import { DashboardWidgetService } from '../../dashboard-widget-service';
-import WidgetEntity from 'src/shared/infrastructure/database/entities/widget-entity';
 import { DashboardHelperService } from '../../dashboard-helper-service';
+import { DashboardWidgetService } from '../../dashboard-widget-service';
 
 const mockReqContext = { userId: '1', ip: '127.0.0.1', userAgent: 'test-agent' } as any;
 
