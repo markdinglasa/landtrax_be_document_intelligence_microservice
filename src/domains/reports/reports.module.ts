@@ -1,5 +1,3 @@
-import { InternalHttpModule } from 'src/shared/infrastructure/http/internal-http.module';
-import { EmailService } from 'src/shared/contracts/email.service.abstract';
 import { Module } from '@nestjs/common';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -18,6 +16,7 @@ import TransactionServiceEntity from 'src/shared/infrastructure/database/entitie
 import TransactionEntity from 'src/shared/infrastructure/database/entities/transaction.entity';
 import UserCompanyEntity from 'src/shared/infrastructure/database/entities/user-company.entity';
 import UserEntity from 'src/shared/infrastructure/database/entities/user.entity';
+import { InternalHttpModule } from 'src/shared/infrastructure/http/internal-http.module';
 import { AuditExportRateLimitService } from './application/services/audit-export-rate-limit.service';
 import { AuditReportsService } from './application/services/audit-reports-service';
 import { CollectionsReportsService } from './application/services/collections-reports-service';
@@ -30,6 +29,7 @@ import { CompanyScopeHelper } from './application/services/shared/company-scope-
 import { TransactionReportsService } from './application/services/transaction-reports-service';
 import { UserReportsService } from './application/services/user-reports-service';
 //import { AuditReportsController } from './presentation/controllers/audit-reports-controller';
+import S3StorageService from 'src/shared/infrastructure/storage/s3-storage-service';
 import { CollectionsReportsController } from './presentation/controllers/collections-reports-controller';
 import { CourierReportsController } from './presentation/controllers/courier-reports-controller';
 import { DocumentReportsController } from './presentation/controllers/document-reports-controller';
@@ -37,7 +37,6 @@ import { EntityCodeReportsController } from './presentation/controllers/entity-c
 import { ServiceCatalogReportsController } from './presentation/controllers/service-catalog-reports-controller';
 import { TransactionReportsController } from './presentation/controllers/transaction-reports-controller';
 import { UserReportsController } from './presentation/controllers/user-reports-controller';
-import S3StorageService from 'src/shared/infrastructure/storage/s3-storage-service';
 
 const domainServices = [
   AuditReportsService,
