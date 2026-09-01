@@ -1,7 +1,5 @@
-import { IsOptional, IsEnum } from 'class-validator';
-import { TransactionReportsSummaryQueryDto } from './transaction-reports-summary-query.dto';
-
-export class TransactionReportsExportQueryDto extends TransactionReportsSummaryQueryDto {
+import { IsEnum, IsOptional } from 'class-validator';
+export class TransactionReportsExportQueryDto {
   @IsOptional()
   @IsEnum(['csv', 'xlsx'])
   format?: 'csv' | 'xlsx' = 'csv';

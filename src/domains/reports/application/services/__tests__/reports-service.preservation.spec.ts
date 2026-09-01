@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { EmailService } from 'src/shared/contracts/email.service.abstract';
 import AuditExportJobEntity from 'src/shared/infrastructure/database/entities/audit-export-job.entity';
 import AuditTrailEntity from 'src/shared/infrastructure/database/entities/audit-trail.entity';
 import CollectionMethodEntity from 'src/shared/infrastructure/database/entities/collection-method.entity';
@@ -14,24 +15,20 @@ import TransactionServiceEntity from 'src/shared/infrastructure/database/entitie
 import TransactionEntity from 'src/shared/infrastructure/database/entities/transaction.entity';
 import UserCompanyEntity from 'src/shared/infrastructure/database/entities/user-company.entity';
 import UserEntity from 'src/shared/infrastructure/database/entities/user.entity';
-import { EmailService } from 'src/shared/contracts/email.service.abstract';
 import S3StorageService from 'src/shared/infrastructure/storage/s3-storage-service';
 import { AuditExportRateLimitService } from '../audit-export-rate-limit.service';
-import { AuditReportsService } from '../audit-reports-service';
-import { CollectionsReportsService } from '../collections-reports-service';
-import { CourierReportsService } from '../courier-reports-service';
-import { DocumentReportsService } from '../document-reports-service';
-import { EntityCodeReportsService } from '../entity-code-reports-service';
-import ReportsService from '../reports-service';
-import { ServiceCatalogReportsService } from '../service-catalog-reports-service';
+import { AuditReportsService } from '../audit-reports.service';
+import { CollectionsReportsService } from '../collections-reports.service';
+import { CourierReportsService } from '../courier-reports.service';
+import { DocumentReportsService } from '../document-reports.service';
+import { EntityCodeReportsService } from '../entity-code-reports.service';
+import ReportsService from '../reports.service';
+import { ServiceCatalogReportsService } from '../service-catalog-reports.service';
 import { CompanyScopeHelper } from '../shared/company-scope-helper';
-import { TransactionReportsService } from '../transaction-reports-service';
-import { UserReportsService } from '../user-reports-service';
+import { TransactionReportsService } from '../transaction-reports.service';
+import { UserReportsService } from '../user-reports.service';
 
-const mockReqContext = { userId: '1', ip: '127.0.0.1', userAgent: 'test-agent' } as any;
-
-describe('ReportsService - Filtering Preservation (Expected to PASS on unfixed code)', () => { 
-  
+describe('ReportsService - Filtering Preservation (Expected to PASS on unfixed code)', () => {
   let service: ReportsService;
   let mockUserQueryBuilder: any;
   let userRepo: any;
@@ -39,7 +36,7 @@ describe('ReportsService - Filtering Preservation (Expected to PASS on unfixed c
   beforeEach(async () => {
     mockUserQueryBuilder = {
       leftJoinAndSelect: jest.fn().mockReturnThis(),
-    leftJoinAndMapOne: jest.fn().mockReturnThis(),
+      leftJoinAndMapOne: jest.fn().mockReturnThis(),
       leftJoin: jest.fn().mockReturnThis(),
       where: jest.fn().mockReturnThis(),
       andWhere: jest.fn().mockReturnThis(),
@@ -69,7 +66,7 @@ describe('ReportsService - Filtering Preservation (Expected to PASS on unfixed c
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ReportsService,
-        
+
         AuditReportsService,
         CollectionsReportsService,
         CourierReportsService,
@@ -98,16 +95,29 @@ describe('ReportsService - Filtering Preservation (Expected to PASS on unfixed c
         { provide: getRepositoryToken(EntityCodeEntity), useValue: userRepo },
         { provide: S3StorageService, useValue: { uploadFile: jest.fn(), getSignedUrl: jest.fn() } },
         { provide: EmailService, useValue: { sendEmail: jest.fn() } },
-        { provide: AuditExportRateLimitService, useValue: { isLimitReached: jest.fn().mockResolvedValue(false), getRemainingSlots: jest.fn().mockResolvedValue(3) } },
-        { provide: getRepositoryToken(AuditExportJobEntity), useValue: { save: jest.fn(), findOne: jest.fn(), update: jest.fn(), count: jest.fn().mockResolvedValue(0) } },
+        {
+          provide: AuditExportRateLimitService,
+          useValue: {
+            isLimitReached: jest.fn().mockResolvedValue(false),
+            getRemainingSlots: jest.fn().mockResolvedValue(3),
+          },
+        },
+        {
+          provide: getRepositoryToken(AuditExportJobEntity),
+          useValue: {
+            save: jest.fn(),
+            findOne: jest.fn(),
+            update: jest.fn(),
+            count: jest.fn().mockResolvedValue(0),
+          },
+        },
       ],
     }).compile();
 
     service = module.get<ReportsService>(ReportsService);
   });
 
-  describe('User Reports - Existing Filter Preservation', () => { 
-  
+  describe('User Reports - Existing Filter Preservation', () => {
     it('should apply status filter correctly', async () => {
       await service.getUserReports({ status: 'ACTIVE' });
       expect(mockUserQueryBuilder.andWhere).toHaveBeenCalledWith('user.status IN (:...statuses)', {

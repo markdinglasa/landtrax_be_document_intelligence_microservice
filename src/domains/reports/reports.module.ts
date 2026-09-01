@@ -17,26 +17,25 @@ import TransactionEntity from 'src/shared/infrastructure/database/entities/trans
 import UserCompanyEntity from 'src/shared/infrastructure/database/entities/user-company.entity';
 import UserEntity from 'src/shared/infrastructure/database/entities/user.entity';
 import { InternalHttpModule } from 'src/shared/infrastructure/http/internal-http.module';
-import { AuditExportRateLimitService } from './application/services/audit-export-rate-limit.service';
-import { AuditReportsService } from './application/services/audit-reports-service';
-import { CollectionsReportsService } from './application/services/collections-reports-service';
-import { CourierReportsService } from './application/services/courier-reports-service';
-import { DocumentReportsService } from './application/services/document-reports-service';
-import { EntityCodeReportsService } from './application/services/entity-code-reports-service';
-import ReportsService from './application/services/reports-service';
-import { ServiceCatalogReportsService } from './application/services/service-catalog-reports-service';
-import { CompanyScopeHelper } from './application/services/shared/company-scope-helper';
-import { TransactionReportsService } from './application/services/transaction-reports-service';
-import { UserReportsService } from './application/services/user-reports-service';
-//import { AuditReportsController } from './presentation/controllers/audit-reports-controller';
 import S3StorageService from 'src/shared/infrastructure/storage/s3-storage-service';
-import { CollectionsReportsController } from './presentation/controllers/collections-reports-controller';
-import { CourierReportsController } from './presentation/controllers/courier-reports-controller';
-import { DocumentReportsController } from './presentation/controllers/document-reports-controller';
-import { EntityCodeReportsController } from './presentation/controllers/entity-code-reports-controller';
-import { ServiceCatalogReportsController } from './presentation/controllers/service-catalog-reports-controller';
-import { TransactionReportsController } from './presentation/controllers/transaction-reports-controller';
-import { UserReportsController } from './presentation/controllers/user-reports-controller';
+import { AuditExportRateLimitService } from './application/services/audit-export-rate-limit.service';
+import { AuditReportsService } from './application/services/audit-reports.service';
+import { CollectionsReportsService } from './application/services/collections-reports.service';
+import { CourierReportsService } from './application/services/courier-reports.service';
+import { DocumentReportsService } from './application/services/document-reports.service';
+import { EntityCodeReportsService } from './application/services/entity-code-reports.service';
+import ReportsService from './application/services/reports.service';
+import { ServiceCatalogReportsService } from './application/services/service-catalog-reports.service';
+import { CompanyScopeHelper } from './application/services/shared/company-scope-helper';
+import { TransactionReportsService } from './application/services/transaction-reports.service';
+import { UserReportsService } from './application/services/user-reports.service';
+import { CollectionsReportsController } from './presentation/controllers/collections-reports.controller';
+import { CourierReportsController } from './presentation/controllers/courier-reports.controller';
+import { DocumentReportsController } from './presentation/controllers/document-reports.controller';
+import { EntityCodeReportsController } from './presentation/controllers/entity-code-reports.controller';
+import { ServiceCatalogReportsController } from './presentation/controllers/service-catalog-reports.controller';
+import { TransactionReportsController } from './presentation/controllers/transaction-reports.controller';
+import { UserReportsController } from './presentation/controllers/user-reports.controller';
 
 const domainServices = [
   AuditReportsService,

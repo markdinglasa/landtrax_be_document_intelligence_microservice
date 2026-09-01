@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { CourierReportsQueryDto } from 'src/domains/reports/application/dtos/courier-reports-query.dto';
+import ReportsService from 'src/domains/reports/application/services/reports.service';
 import { PermissionGuard } from 'src/shared/guards/permission.guard';
 import { RequestContextDto } from 'src/utils';
-import { CourierReportsQueryDto } from 'src/domains/reports/application/dtos/courier-reports-query.dto';
-import ReportsService from 'src/domains/reports/application/services/reports-service';
-import { CourierReportsController } from '../courier-reports-controller';
+import { CourierReportsController } from '../courier-reports.controller';
 
 describe('CourierReportsController', () => {
   let controller: CourierReportsController;

@@ -4,10 +4,10 @@ import { AuditReportItemDto } from './audit-report-item.dto';
 export class AuditReportsResponseDto {
   @Expose()
   @Type(() => AuditReportItemDto)
-  data: AuditReportItemDto[];
+  data!: AuditReportItemDto[];
 
   @Expose()
-  meta: {
+  meta!: {
     total: number;
     page: number;
     limit: number;

@@ -1,15 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import ServiceEntity from 'src/shared/infrastructure/database/entities/service-catalog.entity';
-import { Repository } from 'typeorm';
-import { ServiceCatalogReportsService } from '../service-catalog-reports-service';
+import { ServiceCatalogReportsService } from '../service-catalog-reports.service';
 
-const mockReqContext = { userId: '1', ip: '127.0.0.1', userAgent: 'test-agent' } as any;
-
-describe('ServiceCatalogReportsService', () => { 
-  
+describe('ServiceCatalogReportsService', () => {
   let service: ServiceCatalogReportsService;
-  let repo: Repository<ServiceEntity>;
   let queryBuilder: any;
 
   beforeEach(async () => {
@@ -60,13 +55,12 @@ describe('ServiceCatalogReportsService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('getServiceCatalogReports', () => { 
-  
+  describe('getServiceCatalogReports', () => {
     it('should return reports without filters', async () => {
       const result = await service.getServiceCatalogReports({});
 
       expect(result.meta.total).toBe(1);
-      expect(result.data.length).toBe(1);
+      expect(result.data.length).toHaveLength(1);
       expect(result.data[0].name).toBe('Test Service');
     });
 

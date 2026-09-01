@@ -7,16 +7,14 @@ import { Repository } from 'typeorm';
 
 import { AuditReportsExportQueryDto } from '../dtos/audit-reports-export-query.dto';
 import {
-    AuditExportJobStatusResponseDto,
-    AuditReportsExportResponseDto,
+  AuditExportJobStatusResponseDto,
+  AuditReportsExportResponseDto,
 } from '../dtos/audit-reports-export-response.dto';
 import { AuditReportsQueryDto } from '../dtos/audit-reports-query.dto';
 import { AuditReportsResponseDto } from '../dtos/audit-reports-response.dto';
 import { CollectionsReportsExportQueryDto } from '../dtos/collections-reports-export-query.dto';
 import { CollectionsReportsExportResponseDto } from '../dtos/collections-reports-export-response.dto';
 import { CollectionsReportsQueryDto } from '../dtos/collections-reports-query.dto';
-import { CollectionsReportsSummaryQueryDto } from '../dtos/collections-reports-summary-query.dto';
-import { CollectionsReportsSummaryResponseDto } from '../dtos/collections-reports-summary-response.dto';
 import { CourierReportItemDto } from '../dtos/courier-report-item.dto';
 import { CourierReportsQueryDto } from '../dtos/courier-reports-query.dto';
 import { DocumentReportsQueryDto } from '../dtos/document-reports-query.dto';
@@ -25,22 +23,17 @@ import { EntityCodeReportsQueryDto } from '../dtos/entity-code-reports-query.dto
 import { EntityCodeReportsResponseDto } from '../dtos/entity-code-reports-response.dto';
 import { ServiceCatalogReportsQueryDto } from '../dtos/service-catalog-reports-query.dto';
 import { ServiceCatalogReportsResponseDto } from '../dtos/service-catalog-reports-response.dto';
-import { TransactionReportsExportQueryDto } from '../dtos/transaction-reports-export-query.dto';
-import { TransactionReportsExportResponseDto } from '../dtos/transaction-reports-export-response.dto';
 import { TransactionReportsQueryDto } from '../dtos/transaction-reports-query.dto';
 import { TransactionReportsResponseDto } from '../dtos/transaction-reports-response.dto';
-import { TransactionReportsSummaryQueryDto } from '../dtos/transaction-reports-summary-query.dto';
-import { TransactionReportsSummaryResponseDto } from '../dtos/transaction-reports-summary-response.dto';
 import { UserReportsQueryDto } from '../dtos/user-reports-query.dto';
-import { UserReportsSummaryQueryDto } from '../dtos/user-reports-summary-query.dto';
-import { AuditReportsService } from './audit-reports-service';
-import { CollectionsReportsService } from './collections-reports-service';
-import { CourierReportsService } from './courier-reports-service';
-import { DocumentReportsService } from './document-reports-service';
-import { EntityCodeReportsService } from './entity-code-reports-service';
-import { ServiceCatalogReportsService } from './service-catalog-reports-service';
-import { TransactionReportsService } from './transaction-reports-service';
-import { UserReportsService } from './user-reports-service';
+import { AuditReportsService } from './audit-reports.service';
+import { CollectionsReportsService } from './collections-reports.service';
+import { CourierReportsService } from './courier-reports.service';
+import { DocumentReportsService } from './document-reports.service';
+import { EntityCodeReportsService } from './entity-code-reports.service';
+import { ServiceCatalogReportsService } from './service-catalog-reports.service';
+import { TransactionReportsService } from './transaction-reports.service';
+import { UserReportsService } from './user-reports.service';
 
 /**
  * ReportsService — thin facade that delegates all calls to domain-specific services.
@@ -84,12 +77,6 @@ export default class ReportsService {
     return this.collectionsReportsService.getCollectionsReports(filters, userId);
   }
 
-  async getCollectionsReportsSummary(
-    filters: CollectionsReportsSummaryQueryDto,
-  ): Promise<CollectionsReportsSummaryResponseDto> {
-    return this.collectionsReportsService.getCollectionsReportsSummary(filters);
-  }
-
   async exportCollectionsReports(
     filters: CollectionsReportsExportQueryDto,
   ): Promise<CollectionsReportsExportResponseDto> {
@@ -103,25 +90,11 @@ export default class ReportsService {
     return this.transactionReportsService.getTransactionReports(filters);
   }
 
-  async getTransactionReportsSummary(
-    filters: TransactionReportsSummaryQueryDto,
-    userId?: string,
-  ): Promise<TransactionReportsSummaryResponseDto> {
-    return this.transactionReportsService.getTransactionReportsSummary(filters, userId);
-  }
-
   async getClientTransactionReports(
     filters: TransactionReportsQueryDto,
     userId: string,
   ): Promise<TransactionReportsResponseDto> {
     return this.transactionReportsService.getClientTransactionReports(filters, userId);
-  }
-
-  async exportTransactionReports(
-    filters: TransactionReportsExportQueryDto,
-    userId?: string,
-  ): Promise<TransactionReportsExportResponseDto> {
-    return this.transactionReportsService.exportTransactionReports(filters, userId);
   }
 
   // ─────────────────────────── Audit ────────────────────────────────────────
@@ -175,10 +148,6 @@ export default class ReportsService {
     filters: UserReportsQueryDto,
   ): Promise<{ data: UserEntity[]; meta: CustomMeta }> {
     return this.userReportsService.getUserReports(filters);
-  }
-
-  async getUserReportsSummary(filters: UserReportsSummaryQueryDto, userId?: string): Promise<any> {
-    return this.userReportsService.getUserReportsSummary(filters, userId);
   }
 
   async getClientUserReports(

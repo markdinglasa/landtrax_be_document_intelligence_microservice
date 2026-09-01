@@ -8,8 +8,8 @@ export class CollectionsReportsExportResponseDto {
   jobId?: string;
 
   @Expose()
-  message: string;
+  message!: string;
 
   @Expose()
-  statusCode: number;
+  statusCode!: number;
 }

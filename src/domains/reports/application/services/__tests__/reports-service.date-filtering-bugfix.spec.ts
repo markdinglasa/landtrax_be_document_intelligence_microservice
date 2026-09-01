@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import * as fc from 'fast-check';
+import { EmailService } from 'src/shared/contracts/email.service.abstract';
 import AuditExportJobEntity from 'src/shared/infrastructure/database/entities/audit-export-job.entity';
 import AuditTrailEntity from 'src/shared/infrastructure/database/entities/audit-trail.entity';
 import CollectionEntity from 'src/shared/infrastructure/database/entities/collection.entity';
@@ -11,26 +12,23 @@ import TransactionServiceEntity from 'src/shared/infrastructure/database/entitie
 import TransactionEntity from 'src/shared/infrastructure/database/entities/transaction.entity';
 import UserCompanyEntity from 'src/shared/infrastructure/database/entities/user-company.entity';
 import UserEntity from 'src/shared/infrastructure/database/entities/user.entity';
-import { EmailService } from 'src/shared/contracts/email.service.abstract';
 import S3StorageService from 'src/shared/infrastructure/storage/s3-storage-service';
 import { AuditExportRateLimitService } from '../audit-export-rate-limit.service';
-import { AuditReportsService } from '../audit-reports-service';
-import { CollectionsReportsService } from '../collections-reports-service';
-import { CourierReportsService } from '../courier-reports-service';
-import { DocumentReportsService } from '../document-reports-service';
-import { EntityCodeReportsService } from '../entity-code-reports-service';
-import ReportsService from '../reports-service';
-import { ServiceCatalogReportsService } from '../service-catalog-reports-service';
+import { AuditReportsService } from '../audit-reports.service';
+import { CollectionsReportsService } from '../collections-reports.service';
+import { CourierReportsService } from '../courier-reports.service';
+import { DocumentReportsService } from '../document-reports.service';
+import { EntityCodeReportsService } from '../entity-code-reports.service';
+import ReportsService from '../reports.service';
+import { ServiceCatalogReportsService } from '../service-catalog-reports.service';
 import { CompanyScopeHelper } from '../shared/company-scope-helper';
-import { TransactionReportsService } from '../transaction-reports-service';
-import { UserReportsService } from '../user-reports-service';
+import { TransactionReportsService } from '../transaction-reports.service';
+import { UserReportsService } from '../user-reports.service';
 
 const isTargetCallTransaction = (call: any[]) =>
   call[0] === 'ISNULL(t.updatedDate, t.createdDate) <= :dateTo';
 const isTargetCallDocument = (call: any[]) =>
   call[0] === 'ISNULL(document.updatedDate, document.createdDate) <= :dateTo';
-
-const mockReqContext = { userId: '1', ip: '127.0.0.1', userAgent: 'test-agent' } as any;
 
 /**
  * Helper function to check if input matches bug condition

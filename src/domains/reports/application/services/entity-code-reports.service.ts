@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import EntityCodeEntity from 'src/shared/infrastructure/database/entities/entity-code.entity';
-import { Repository, SelectQueryBuilder } from 'typeorm';
 import { normalizeDateToFilter } from 'src/utils/date-utils';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { EntityCodeReportItemDto } from '../dtos/entity-code-report-item.dto';
 import { EntityCodeReportsQueryDto } from '../dtos/entity-code-reports-query.dto';
 import { EntityCodeReportsResponseDto } from '../dtos/entity-code-reports-response.dto';
@@ -129,7 +129,6 @@ export class EntityCodeReportsService {
 
   private transformEntityCodeReportItem(entity: EntityCodeEntity): EntityCodeReportItemDto {
     return {
-      id: entity.id,
       company: entity.company?.name || 'N/A',
       companyEmail: entity?.company?.email || 'N/A',
       entityCode: entity.code,

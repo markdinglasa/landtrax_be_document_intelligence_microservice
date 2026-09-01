@@ -1,15 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import EntityCodeEntity from 'src/shared/infrastructure/database/entities/entity-code.entity';
-import { Repository } from 'typeorm';
-import { EntityCodeReportsService } from '../entity-code-reports-service';
+import { EntityCodeReportsService } from '../entity-code-reports.service';
 
-const mockReqContext = { userId: '1', ip: '127.0.0.1', userAgent: 'test-agent' } as any;
-
-describe('EntityCodeReportsService', () => { 
-  
+describe('EntityCodeReportsService', () => {
   let service: EntityCodeReportsService;
-  let repo: Repository<EntityCodeEntity>;
   let queryBuilder: any;
 
   beforeEach(async () => {
@@ -56,13 +51,12 @@ describe('EntityCodeReportsService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('getEntityCodeReports', () => { 
-  
+  describe('getEntityCodeReports', () => {
     it('should return reports without filters', async () => {
       const result = await service.getEntityCodeReports({});
 
       expect(result.meta.total).toBe(1);
-      expect(result.data.length).toBe(1);
+      expect(result.data.length).toHaveLength(1);
       expect(result.data[0].entityCode).toBe('CODE1');
       expect(queryBuilder.getManyAndCount).toHaveBeenCalled();
     });

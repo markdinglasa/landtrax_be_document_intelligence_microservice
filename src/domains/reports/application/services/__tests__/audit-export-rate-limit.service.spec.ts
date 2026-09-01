@@ -2,15 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import AuditExportJobEntity from 'src/shared/infrastructure/database/entities/audit-export-job.entity';
 import {
-    AuditExportRateLimitService,
-    LARGE_EXPORT_HOURLY_LIMIT,
-    LARGE_EXPORT_THRESHOLD,
+  AuditExportRateLimitService,
+  LARGE_EXPORT_HOURLY_LIMIT,
+  LARGE_EXPORT_THRESHOLD,
 } from '../audit-export-rate-limit.service';
 
-const mockReqContext = { userId: '1', ip: '127.0.0.1', userAgent: 'test-agent' } as any;
-
-describe('AuditExportRateLimitService', () => { 
-  
+describe('AuditExportRateLimitService', () => {
   let service: AuditExportRateLimitService;
   let mockGetCount: jest.Mock;
 
@@ -43,8 +40,7 @@ describe('AuditExportRateLimitService', () => {
 
   // ─── isLimitReached ────────────────────────────────────────────────────────
 
-  describe('isLimitReached', () => { 
-  
+  describe('isLimitReached', () => {
     it('should return false when no jobs exist in the last hour', async () => {
       const module: TestingModule = await buildModule(0);
       service = module.get(AuditExportRateLimitService);
@@ -106,8 +102,7 @@ describe('AuditExportRateLimitService', () => {
 
   // ─── getRemainingSlots ─────────────────────────────────────────────────────
 
-  describe('getRemainingSlots', () => { 
-  
+  describe('getRemainingSlots', () => {
     it('should return 3 when no jobs exist in the last hour', async () => {
       const module: TestingModule = await buildModule(0);
       service = module.get(AuditExportRateLimitService);
@@ -149,16 +144,15 @@ describe('AuditExportRateLimitService', () => {
 
   // ─── integration scenarios ─────────────────────────────────────────────────
 
-  describe('integration scenarios', () => { 
-  
+  describe('integration scenarios', () => {
     it('should enforce the 3-per-hour limit correctly across all slot counts', async () => {
       const cases: [number, boolean, number][] = [
         // [jobCount, expectedLimitReached, expectedRemainingSlots]
         [0, false, 3],
         [1, false, 2],
         [2, false, 1],
-        [3, true,  0],
-        [4, true,  0],
+        [3, true, 0],
+        [4, true, 0],
       ];
 
       for (const [count, expectedLimit, expectedSlots] of cases) {

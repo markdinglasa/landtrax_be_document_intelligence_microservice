@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { CourierReportsQueryDto } from 'src/domains/reports/application/dtos/courier-reports-query.dto';
 import { USER_TYPE } from 'src/shared/common';
 import LandtraxAddressEntity from 'src/shared/infrastructure/database/entities/landtrax-address.entity';
 import TransactionServiceEntity from 'src/shared/infrastructure/database/entities/transaction-service.entity';
 import UserEntity from 'src/shared/infrastructure/database/entities/user.entity';
-import { CourierReportsQueryDto } from 'src/domains/reports/application/dtos/courier-reports-query.dto';
-import { CourierReportsService } from '../courier-reports-service';
+import { CourierReportsService } from '../courier-reports.service';
 
 describe('CourierReportsService', () => {
   let service: CourierReportsService;
@@ -90,7 +90,7 @@ describe('CourierReportsService', () => {
       expect(mockTransactionServiceRepo.createQueryBuilder).toHaveBeenCalledWith(
         'transactionServices',
       );
-      expect(result.data.length).toBe(1);
+      expect(result.data.length).toHaveLength(1);
       expect(result.data[0]).toEqual({
         transactionNumber: 'TX-001',
         transactionServiceNumber: 'TS-001',

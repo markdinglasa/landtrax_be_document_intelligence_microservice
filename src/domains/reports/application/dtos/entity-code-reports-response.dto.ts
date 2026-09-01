@@ -4,10 +4,10 @@ import { EntityCodeReportItemDto } from './entity-code-report-item.dto';
 export class EntityCodeReportsResponseDto {
   @Expose()
   @Type(() => EntityCodeReportItemDto)
-  data: EntityCodeReportItemDto[];
+  data!: EntityCodeReportItemDto[];
 
   @Expose()
-  meta: {
+  meta!: {
     total: number;
     page: number;
     limit: number;

@@ -1,14 +1,12 @@
 import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserStatus } from 'src/shared/common/app-enums';
 import { CustomMeta } from 'src/shared/common';
+import { USER_TYPE, UserStatus } from 'src/shared/common/app-enums';
 import AuditTrailEntity from 'src/shared/infrastructure/database/entities/audit-trail.entity';
 import UserEntity from 'src/shared/infrastructure/database/entities/user.entity';
 import { foramtPhoneNumber, mainRoleTransform } from 'src/utils';
 import { Repository, SelectQueryBuilder } from 'typeorm';
-import { USER_TYPE } from 'src/shared/common/app-enums';
 import { UserReportsQueryDto } from '../dtos/user-reports-query.dto';
-import { UserReportsSummaryQueryDto } from '../dtos/user-reports-summary-query.dto';
 import { CompanyScopeHelper } from './shared/company-scope-helper';
 
 @Injectable()
@@ -17,7 +15,6 @@ export class UserReportsService {
     @InjectRepository(UserEntity)
     private readonly _userRepo: Repository<UserEntity>,
     @InjectRepository(AuditTrailEntity)
-    private readonly _auditTrailRepo: Repository<AuditTrailEntity>,
     private readonly _companyScopeHelper: CompanyScopeHelper,
   ) {}
 
@@ -120,61 +117,6 @@ export class UserReportsService {
       if (e instanceof HttpException) throw e;
       console.error(`Error generating user reports: ${(e as Error).message}`);
       return { data: [], meta: { total: 0, page: 1, limit: 50, totalPages: 0 } };
-    }
-  }
-
-  async getUserReportsSummary(filters: UserReportsSummaryQueryDto, userId?: string): Promise<any> {
-    try {
-      const queryBuilder = this.applyBaseUserReportsFilters();
-
-      if (userId) {
-        const scopedUserIds = await this._companyScopeHelper.getCompanyUserIds(userId);
-        if (scopedUserIds.length === 0) {
-          return {
-            totalUsers: 0,
-            activeUsers: 0,
-            inactiveUsers: 0,
-            emailVerifiedCount: 0,
-            twoFactorAdoptionRate: 0,
-          };
-        }
-        queryBuilder.andWhere('user.id IN (:...userIds)', { userIds: scopedUserIds });
-      }
-
-      this.applySearchAndDateFilters(queryBuilder, filters);
-      this.applyRegistrationStatusFilter(queryBuilder, filters);
-      this.applyUserReportsFilters(queryBuilder, filters);
-
-      const totalUsers = await queryBuilder.getCount();
-      const activeUsers = await queryBuilder.clone().andWhere("user.status = 'ACTIVE'").getCount();
-      const inactiveUsers = await queryBuilder
-        .clone()
-        .andWhere("user.status = 'INACTIVE'")
-        .getCount();
-
-      const emailVerifiedCount = await queryBuilder
-        .clone()
-        .andWhere('user.emailVerifiedDate IS NOT NULL')
-        .getCount();
-
-      const twoFactorEnabledCount = await queryBuilder
-        .clone()
-        .andWhere('(user.twoFactorEnabled = 1 OR user.mfaEnabled = 1)')
-        .getCount();
-
-      const twoFactorAdoptionRate =
-        totalUsers > 0 ? Math.round((twoFactorEnabledCount / totalUsers) * 100) : 0;
-
-      return { totalUsers, activeUsers, inactiveUsers, emailVerifiedCount, twoFactorAdoptionRate };
-    } catch (e) {
-      console.error(`Error generating user reports summary: ${(e as Error).message}`);
-      return {
-        totalUsers: 0,
-        activeUsers: 0,
-        inactiveUsers: 0,
-        emailVerifiedCount: 0,
-        twoFactorAdoptionRate: 0,
-      };
     }
   }
 
@@ -489,8 +431,9 @@ export class UserReportsService {
       return 'Corporate';
     };
 
-    const roles = user?.userRoles?.map((userRole) => mainRoleTransform(userRole?.role?.name));
-    const dededupRoles = [...new Set(roles)].join(',');
+    const roles: string[] =
+      user?.userRoles?.map((userRole) => mainRoleTransform(userRole?.role?.name)) || [];
+    const dededupRoles = new Set(roles);
 
     return {
       id: user.id,
@@ -503,7 +446,7 @@ export class UserReportsService {
       lastLoginDate: user.lastLoginDate?.toISOString() || '',
       company: user.userCompanies?.[0]?.company?.name,
       userType: userTypeFormatted(),
-      userRole: dededupRoles,
+      userRole: [...dededupRoles].join(', '),
       registryOfDeedId: user.registryOfDeedId,
       location: locationMap?.[user.registryOfDeedId ?? ''] || null,
     };

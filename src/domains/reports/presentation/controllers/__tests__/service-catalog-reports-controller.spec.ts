@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PermissionGuard } from 'src/shared/guards/permission.guard';
 import { ServiceCatalogReportsQueryDto } from 'src/domains/reports/application/dtos/service-catalog-reports-query.dto';
-import ReportsService from 'src/domains/reports/application/services/reports-service';
-import { ServiceCatalogReportsController } from '../service-catalog-reports-controller';
+import ReportsService from 'src/domains/reports/application/services/reports.service';
+import { PermissionGuard } from 'src/shared/guards/permission.guard';
+import { ServiceCatalogReportsController } from '../service-catalog-reports.controller';
 
 describe('ServiceCatalogReportsController', () => {
   let controller: ServiceCatalogReportsController;
@@ -21,7 +21,10 @@ describe('ServiceCatalogReportsController', () => {
           useValue: mockReportsService,
         },
       ],
-    }).overrideGuard(PermissionGuard).useValue({ canActivate: jest.fn(() => true) }).compile();
+    })
+      .overrideGuard(PermissionGuard)
+      .useValue({ canActivate: jest.fn(() => true) })
+      .compile();
 
     controller = module.get<ServiceCatalogReportsController>(ServiceCatalogReportsController);
     reportsService = module.get(ReportsService);

@@ -2,32 +2,29 @@ import { Expose } from 'class-transformer';
 
 export class EntityCodeReportItemDto {
   @Expose()
-  id: string;
+  company!: string;
 
   @Expose()
-  company: string;
+  companyEmail!: string;
 
   @Expose()
-  companyEmail: string;
+  entityCode!: string;
 
   @Expose()
-  entityCode: string;
+  accountOwner!: string;
 
   @Expose()
-  accountOwner: string;
+  accountOwnerEmail!: string;
 
   @Expose()
-  accountOwnerEmail: string;
+  proposalReferences!: string;
 
   @Expose()
-  proposalReferences: string;
+  status!: string;
 
   @Expose()
-  status: string;
+  generatedBy!: string;
 
   @Expose()
-  generatedBy: string;
-
-  @Expose()
-  generatedDate: string;
+  generatedDate!: string;
 }

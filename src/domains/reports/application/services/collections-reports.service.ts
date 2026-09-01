@@ -1,21 +1,19 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import S3StorageService from 'src/shared/infrastructure/storage/s3-storage-service';
 import { CustomMeta } from 'src/shared/common';
+import { CollectionStatus, USER_TYPE } from 'src/shared/common/app-enums';
 import CollectionMethodEntity from 'src/shared/infrastructure/database/entities/collection-method.entity';
 import CollectionEntity from 'src/shared/infrastructure/database/entities/collection.entity';
 import ServiceEntity from 'src/shared/infrastructure/database/entities/service-catalog.entity';
 import TransactionServiceEntity from 'src/shared/infrastructure/database/entities/transaction-service.entity';
 import TransactionEntity from 'src/shared/infrastructure/database/entities/transaction.entity';
 import UserEntity from 'src/shared/infrastructure/database/entities/user.entity';
+import S3StorageService from 'src/shared/infrastructure/storage/s3-storage-service';
 import { Brackets, IsNull, Repository, SelectQueryBuilder } from 'typeorm';
-import { CollectionStatus, USER_TYPE } from 'src/shared/common/app-enums';
 import { FileUtils } from '../../infrastructure/utils/file-utils';
 import { CollectionsReportsExportQueryDto } from '../dtos/collections-reports-export-query.dto';
 import { CollectionsReportsExportResponseDto } from '../dtos/collections-reports-export-response.dto';
 import { CollectionsReportsQueryDto } from '../dtos/collections-reports-query.dto';
-import { CollectionsReportsSummaryQueryDto } from '../dtos/collections-reports-summary-query.dto';
-import { CollectionsReportsSummaryResponseDto } from '../dtos/collections-reports-summary-response.dto';
 
 @Injectable()
 export class CollectionsReportsService {
@@ -27,7 +25,10 @@ export class CollectionsReportsService {
     private readonly _storageService: S3StorageService,
   ) {}
 
-  private applyDateFilters(query: SelectQueryBuilder<TransactionEntity>, filters: CollectionsReportsQueryDto) {
+  private applyDateFilters(
+    query: SelectQueryBuilder<TransactionEntity>,
+    filters: CollectionsReportsQueryDto,
+  ) {
     if (filters.dateFrom && filters.dateTo) {
       if (new Date(filters.dateFrom) > new Date(filters.dateTo)) {
         throw new BadRequestException('Start date cannot be after end date');
@@ -51,7 +52,10 @@ export class CollectionsReportsService {
     }
   }
 
-  private applyMiscFilters(query: SelectQueryBuilder<TransactionEntity>, filters: CollectionsReportsQueryDto) {
+  private applyMiscFilters(
+    query: SelectQueryBuilder<TransactionEntity>,
+    filters: CollectionsReportsQueryDto,
+  ) {
     if (filters.company) {
       query.andWhere('c.name LIKE :company', { company: `%${filters.company}%` });
     }
@@ -216,7 +220,8 @@ export class CollectionsReportsService {
         transactionNumber: 't.transactionNumber',
         company: 'c.name',
         requestor: 'requestor',
-        location: '(SELECT rod_sort.Name FROM RegistryOfDeed rod_sort WHERE rod_sort.Id = t.RegistryOfDeedId)',
+        location:
+          '(SELECT rod_sort.Name FROM RegistryOfDeed rod_sort WHERE rod_sort.Id = t.RegistryOfDeedId)',
       };
       const dbColumn = sortMapping[sortBy] || sortMapping.lastModified;
 
@@ -303,104 +308,6 @@ export class CollectionsReportsService {
       return {
         data: [],
         meta: { total: 0, page: 1, limit: 25, totalPages: 0 },
-      };
-    }
-  }
-
-  async getCollectionsReportsSummary(
-    filters: CollectionsReportsSummaryQueryDto,
-  ): Promise<CollectionsReportsSummaryResponseDto> {
-    try {
-      const query = this.buildBaseQuery(filters);
-
-      const summaryRaw = await query
-        .select([
-          `CASE WHEN t.paymentStatus IS NULL THEN '${CollectionStatus.PENDING}' ELSE t.paymentStatus END AS status`,
-          'COUNT(DISTINCT t.id) AS count',
-          'SUM(tsTotals.totalAmountDue) AS totalAmountDue',
-          'SUM(cmTotals.amountPaid) AS amountPaid',
-        ])
-        .groupBy(
-          `CASE WHEN t.paymentStatus IS NULL THEN '${CollectionStatus.PENDING}' ELSE t.paymentStatus END`,
-        )
-        .getRawMany();
-
-      let totalCount = 0;
-      let totalAmount = 0;
-      let paidCount = 0;
-      let paidAmount = 0;
-      let pendingCount = 0;
-      let pendingAmount = 0;
-      const failedCount = 0; // Legacy
-      const failedAmount = 0; // Legacy
-      const overdueCount = 0; // Legacy
-      const overdueAmount = 0; // Legacy
-
-      for (const row of summaryRaw) {
-        const count = Number(row.count || 0);
-        const amount = Number(row.amountPaid || 0);
-        const due = Number(row.totalAmountDue || 0);
-
-        totalCount += count;
-        totalAmount += due;
-
-        if (row.status === CollectionStatus.FULLY_PAID) {
-          paidCount += count;
-          paidAmount += amount;
-        } else if (
-          row.status === CollectionStatus.PENDING ||
-          row.status === CollectionStatus.PARTIALLY_PAID
-        ) {
-          pendingCount += count;
-          pendingAmount += amount;
-        }
-        /*else if (row.status === CollectionStatus.FAILED) {
-          failedCount += count;
-          failedAmount += amount;
-        }*/
-      }
-
-      return {
-        totalCount,
-        paidCount,
-        pendingCount,
-        failedCount,
-        overdueCount,
-        totalAmount: Number(totalAmount.toFixed(2)),
-        paidAmount: Number(paidAmount.toFixed(2)),
-        pendingAmount: Number(pendingAmount.toFixed(2)),
-        failedAmount: Number(failedAmount.toFixed(2)),
-        overdueAmount: Number(overdueAmount.toFixed(2)),
-        agingBreakdown: {
-          current: { count: totalCount, amount: Number(totalAmount.toFixed(2)) },
-          '1-30': { count: 0, amount: 0 },
-          '31-60': { count: 0, amount: 0 },
-          '61-90': { count: 0, amount: 0 },
-          '90+': { count: 0, amount: 0 },
-        },
-        paymentMethodBreakdown: [],
-      };
-    } catch (error) {
-      console.error(`Error generating collections reports summary: ${(error as Error).message}`);
-      return {
-        totalCount: 0,
-        paidCount: 0,
-        pendingCount: 0,
-        failedCount: 0,
-        overdueCount: 0,
-        totalAmount: 0,
-        paidAmount: 0,
-        pendingAmount: 0,
-        failedAmount: 0,
-        overdueAmount: 0,
-        agingBreakdown: {
-          current: { count: 0, amount: 0 },
-          '1-30': { count: 0, amount: 0 },
-          '31-60': { count: 0, amount: 0 },
-          '61-90': { count: 0, amount: 0 },
-          '90+': { count: 0, amount: 0 },
-        },
-        paymentMethodBreakdown: [],
       };
     }
   }

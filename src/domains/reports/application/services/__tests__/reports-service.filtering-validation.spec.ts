@@ -1,6 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { EmailService } from 'src/shared/contracts/email.service.abstract';
 import AuditExportJobEntity from 'src/shared/infrastructure/database/entities/audit-export-job.entity';
 import AuditTrailEntity from 'src/shared/infrastructure/database/entities/audit-trail.entity';
 import CollectionMethodEntity from 'src/shared/infrastructure/database/entities/collection-method.entity';
@@ -15,29 +16,23 @@ import TransactionServiceEntity from 'src/shared/infrastructure/database/entitie
 import TransactionEntity from 'src/shared/infrastructure/database/entities/transaction.entity';
 import UserCompanyEntity from 'src/shared/infrastructure/database/entities/user-company.entity';
 import UserEntity from 'src/shared/infrastructure/database/entities/user.entity';
-import { EmailService } from 'src/shared/contracts/email.service.abstract';
 import S3StorageService from 'src/shared/infrastructure/storage/s3-storage-service';
 import { AuditExportRateLimitService } from '../audit-export-rate-limit.service';
-import { AuditReportsService } from '../audit-reports-service';
-import { CollectionsReportsService } from '../collections-reports-service';
-import { CourierReportsService } from '../courier-reports-service';
-import { DocumentReportsService } from '../document-reports-service';
-import { EntityCodeReportsService } from '../entity-code-reports-service';
-import ReportsService from '../reports-service';
-import { ServiceCatalogReportsService } from '../service-catalog-reports-service';
+import { AuditReportsService } from '../audit-reports.service';
+import { CollectionsReportsService } from '../collections-reports.service';
+import { CourierReportsService } from '../courier-reports.service';
+import { DocumentReportsService } from '../document-reports.service';
+import { EntityCodeReportsService } from '../entity-code-reports.service';
+import ReportsService from '../reports.service';
+import { ServiceCatalogReportsService } from '../service-catalog-reports.service';
 import { CompanyScopeHelper } from '../shared/company-scope-helper';
-import { TransactionReportsService } from '../transaction-reports-service';
-import { UserReportsService } from '../user-reports-service';
-
-const mockReqContext = { userId: '1', ip: '127.0.0.1', userAgent: 'test-agent' } as any;
+import { TransactionReportsService } from '../transaction-reports.service';
+import { UserReportsService } from '../user-reports.service';
 
 describe('ReportsService - Filtering and Validation (Bug Condition Exploration)', () => {
   let service: ReportsService;
-  let mockUserQueryBuilder: any;
-  let mockAuditQueryBuilder: any;
   let userRepo: any;
   let auditRepo: any;
-  let userRepository: any;
 
   const createMockQueryBuilder = () => ({
     leftJoinAndSelect: jest.fn().mockReturnThis(),
