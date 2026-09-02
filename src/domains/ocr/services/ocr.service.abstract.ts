@@ -1,5 +1,5 @@
-import { OCRStatus } from 'src/shared/common/ocr-enums.js';
-import ExtractedFieldEntity from 'src/shared/infrastructure/database/entities/extracted-field.entity.js';
+import { OCRStatus } from '../../../shared/common/ocr-enums.js';
+import ExtractedFieldEntity from '../../../shared/infrastructure/database/entities/extracted-field.entity.js';
 import { ProcessBatchDto } from '../dtos/process-batch.dto.js';
 import { ProcessCompositeBatchDto } from '../dtos/process-composite.dto.js';
 import { ProcessReplacementDto } from '../dtos/process-replacement.dto.js';

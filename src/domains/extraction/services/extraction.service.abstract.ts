@@ -1,4 +1,4 @@
-import ExtractedFieldEntity from 'src/shared/infrastructure/database/entities/extracted-field.entity.js';
+import ExtractedFieldEntity from '../../../shared/infrastructure/database/entities/extracted-field.entity.js';
 
 export interface ExtractedFieldItem {
   fieldName: string;

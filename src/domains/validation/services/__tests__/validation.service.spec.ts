@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { OCRFailureReason } from 'src/shared/common/ocr-enums.js';
-import DocumentEntity from 'src/shared/infrastructure/database/entities/document.entity.js';
-import RequirementEntity from 'src/shared/infrastructure/database/entities/requirement.entity.js';
+import { OCRFailureReason } from '../../../../shared/common/ocr-enums.js';
+import DocumentEntity from '../../../../shared/infrastructure/database/entities/document.entity.js';
+import RequirementEntity from '../../../../shared/infrastructure/database/entities/requirement.entity.js';
 import { ValidationService } from '../validation.service.js';
 
 describe('ValidationService', () => {

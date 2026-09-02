@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import ExtractedFieldEntity from 'src/shared/infrastructure/database/entities/extracted-field.entity.js';
-import RequirementMappingEntity from 'src/shared/infrastructure/database/entities/requirement-mapping.entity.js';
+import ExtractedFieldEntity from '../../shared/infrastructure/database/entities/extracted-field.entity.js';
+import RequirementMappingEntity from '../../shared/infrastructure/database/entities/requirement-mapping.entity.js';
 import { IExtractionService } from './services/extraction.service.abstract.js';
 import { ExtractionService } from './services/extraction.service.js';
 

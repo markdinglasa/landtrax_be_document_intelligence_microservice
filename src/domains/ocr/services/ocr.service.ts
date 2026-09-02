@@ -3,21 +3,21 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Queue } from 'bullmq';
-import { Repository, In, IsNull } from 'typeorm';
+import { ExtractionService } from '../../extraction/services/extraction.service.js';
+import { BatchUploadJobData, OcrJobData } from '../../queue/ocr-queue.constants.js';
+import { ValidationService } from '../../validation/services/validation.service.js';
 import {
   OCR_BATCH_QUEUE,
-  OCR_PROCESSING_QUEUE,
   OCR_MODULE_NAME,
+  OCR_PROCESSING_QUEUE,
   OCRAuditAction,
   OCRStatus,
-} from 'src/shared/common/ocr-enums.js';
-import { AuditTrailStatus } from 'src/shared/common/status.js';
-import { AuditTrailService } from 'src/shared/contracts/audit-trail.service.abstract.js';
-import DocumentEntity from 'src/shared/infrastructure/database/entities/document.entity.js';
-import ExtractedFieldEntity from 'src/shared/infrastructure/database/entities/extracted-field.entity.js';
-import { ExtractionService } from 'src/domains/extraction/services/extraction.service.js';
-import { BatchUploadJobData, OcrJobData } from 'src/domains/queue/ocr-queue.constants.js';
-import { ValidationService } from 'src/domains/validation/services/validation.service.js';
+} from '../../../shared/common/ocr-enums.js';
+import { AuditTrailStatus } from '../../../shared/common/status.js';
+import { AuditTrailService } from '../../../shared/contracts/audit-trail.service.abstract.js';
+import DocumentEntity from '../../../shared/infrastructure/database/entities/document.entity.js';
+import ExtractedFieldEntity from '../../../shared/infrastructure/database/entities/extracted-field.entity.js';
+import { In, IsNull, Repository } from 'typeorm';
 import { ProcessBatchDto } from '../dtos/process-batch.dto.js';
 import { ProcessReplacementDto } from '../dtos/process-replacement.dto.js';
 import { UpdateFieldDto } from '../dtos/update-field.dto.js';
@@ -56,7 +56,9 @@ export class OcrService extends IOcrService {
       message?: string;
     }[];
   }> {
-    this.logger.log(`Processing batch upload of ${dto.documents.length} document(s) for transaction=${dto.transactionId}`);
+    this.logger.log(
+      `Processing batch upload of ${dto.documents.length} document(s) for transaction=${dto.transactionId}`,
+    );
     const results: {
       documentId: string;
       fileName: string;
@@ -65,7 +67,8 @@ export class OcrService extends IOcrService {
     }[] = [];
 
     for (const doc of dto.documents) {
-      // 1. Duplicate check (FileName + FileSize) (AC 30-32)
+      // 1. Duplicate check (FileName + FileSize)
+      // + ExtractedFields check (AC 10-17) if requirement has exactly the same fields and values as an existing document in the same transaction
       const dupCheck = await this.validationService.checkDuplicate(
         doc.fileName,
         doc.fileSize,
@@ -82,7 +85,7 @@ export class OcrService extends IOcrService {
         continue;
       }
 
-      // 2. Pre-validation against Requirement settings if requirementId provided (AC 2)
+      // 2. Pre-validation against Requirement settings if requirementId provided
       if (doc.requirementId) {
         const valCheck = await this.validationService.validateFile(
           doc.fileName,
@@ -102,7 +105,7 @@ export class OcrService extends IOcrService {
         }
       }
 
-      // 3. Queue the successfully validated file for OCR processing (AC 3)
+      // 3. Queue the successfully validated file for OCR processing
       await this.ocrProcessingQueue.add(`ocr-job-${doc.documentId}`, {
         documentId: doc.documentId,
         transactionId: dto.transactionId,
@@ -124,7 +127,7 @@ export class OcrService extends IOcrService {
     }
 
     return {
-      success: results.some(r => r.status === 'QUEUED'),
+      success: results.some((r) => r.status === 'QUEUED'),
       results,
     };
   }
@@ -136,7 +139,9 @@ export class OcrService extends IOcrService {
     success: boolean;
     message: string;
   }> {
-    this.logger.log(`Processing replacement documentId=${dto.documentId} for requirement=${dto.requirementId}`);
+    this.logger.log(
+      `Processing replacement documentId=${dto.documentId} for requirement=${dto.requirementId}`,
+    );
 
     // Validate replacement file against requirement validations (AC 40-41)
     const valCheck = await this.validationService.validateFile(
@@ -185,7 +190,9 @@ export class OcrService extends IOcrService {
   /**
    * Submit a large composite multi-requirement PDF for segregation and batch processing.
    */
-  async processCompositeBatch(jobData: BatchUploadJobData): Promise<{ success: boolean; message: string }> {
+  async processCompositeBatch(
+    jobData: BatchUploadJobData,
+  ): Promise<{ success: boolean; message: string }> {
     this.logger.log(`Enqueuing composite batch upload: ${jobData.fileName}`);
     await this.ocrBatchQueue.add(`batch-split-${jobData.transactionId}`, jobData);
     return {
@@ -214,14 +221,15 @@ export class OcrService extends IOcrService {
       where: { id: In(documentIds), deletedDate: IsNull() },
     });
 
-    return documents.map(doc => {
+    return documents.map((doc) => {
       let status: OCRStatus = OCRStatus.PROCESSING;
 
       if (doc.ocrProcessed) {
         if (doc.ocrProcessFailedReason) {
-          status = doc.ocrConfidence === 0 && doc.ocrText === ''
-            ? OCRStatus.NOT_READABLE
-            : OCRStatus.PROCESSING_FAILED;
+          status =
+            doc.ocrConfidence === 0 && doc.ocrText === ''
+              ? OCRStatus.NOT_READABLE
+              : OCRStatus.PROCESSING_FAILED;
         } else {
           status = OCRStatus.SUCCESS;
         }
@@ -240,8 +248,12 @@ export class OcrService extends IOcrService {
   /**
    * Manually update an OCR field value (AC 21-24, 45-46).
    */
-  async updateField(dto: UpdateFieldDto): Promise<{ success: boolean; field: ExtractedFieldEntity }> {
-    this.logger.log(`User ${dto.userId} manually updating field "${dto.fieldName}" on document ${dto.documentId}`);
+  async updateField(
+    dto: UpdateFieldDto,
+  ): Promise<{ success: boolean; field: ExtractedFieldEntity }> {
+    this.logger.log(
+      `User ${dto.userId} manually updating field "${dto.fieldName}" on document ${dto.documentId}`,
+    );
 
     let field = await this.extractedFieldRepo.findOne({
       where: { documentId: dto.documentId, fieldName: dto.fieldName, deletedDate: IsNull() },
@@ -313,7 +325,7 @@ export class OcrService extends IOcrService {
     this.logger.log(`Handling re-execution for document ${documentId} (overwrite=${overwrite})`);
 
     const existingFields = await this.extractionService.getFieldsByDocumentId(documentId);
-    const existingMap = new Map(existingFields.map(f => [f.fieldName, f]));
+    const existingMap = new Map(existingFields.map((f) => [f.fieldName, f]));
 
     const fieldsToSave: ExtractedFieldEntity[] = [];
 

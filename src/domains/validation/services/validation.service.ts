@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, IsNull } from 'typeorm';
-import DocumentEntity from 'src/shared/infrastructure/database/entities/document.entity.js';
-import RequirementEntity from 'src/shared/infrastructure/database/entities/requirement.entity.js';
-import { OCRFailureReason } from 'src/shared/common/ocr-enums.js';
+import { OCRFailureReason } from '../../../shared/common/ocr-enums.js';
+import DocumentEntity from '../../../shared/infrastructure/database/entities/document.entity.js';
+import RequirementEntity from '../../../shared/infrastructure/database/entities/requirement.entity.js';
+import { IsNull, Repository } from 'typeorm';
 import { IValidationService } from './validation.service.abstract.js';
 
 @Injectable()
@@ -38,15 +38,23 @@ export class ValidationService extends IValidationService {
       }
 
       if (requirement.maxFileSize && fileSize > requirement.maxFileSize) {
-        return { valid: false, message: `File size exceeds the maximum allowed size of ${requirement.maxFileSize} bytes` };
+        return {
+          valid: false,
+          message: `File size exceeds the maximum allowed size of ${requirement.maxFileSize} bytes`,
+        };
       }
 
       if (requirement.acceptedFileTypes) {
-        const acceptedTypes = requirement.acceptedFileTypes.split(',').map((t: string) => t.trim().toLowerCase());
+        const acceptedTypes = new Set(
+          requirement.acceptedFileTypes.split(',').map((t: string) => t.trim().toLowerCase()),
+        );
         const ext = fileName.split('.').pop()?.toLowerCase() || '';
-        
-        if (!acceptedTypes.includes(ext) && !acceptedTypes.includes(fileType.toLowerCase())) {
-          return { valid: false, message: `File type not accepted. Accepted types are: ${requirement.acceptedFileTypes}` };
+
+        if (!acceptedTypes.has(ext) && !acceptedTypes.has(fileType.toLowerCase())) {
+          return {
+            valid: false,
+            message: `File type not accepted. Accepted types are: ${requirement.acceptedFileTypes}`,
+          };
         }
       }
 
@@ -92,7 +100,10 @@ export class ValidationService extends IValidationService {
   /**
    * Pre-checks for unreadable conditions.
    */
-  detectUnreadableConditions(fileBuffer: Buffer, fileName: string): { isReadable: boolean; failureReason?: string } {
+  detectUnreadableConditions(
+    fileBuffer: Buffer,
+    fileName: string,
+  ): { isReadable: boolean; failureReason?: string } {
     try {
       if (!fileBuffer || fileBuffer.length === 0) {
         return { isReadable: false, failureReason: OCRFailureReason.BLANK_DOCUMENT };

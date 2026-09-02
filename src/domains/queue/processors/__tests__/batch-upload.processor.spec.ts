@@ -2,12 +2,12 @@ import { getQueueToken } from '@nestjs/bullmq';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Job } from 'bullmq';
-import { OCR_PROCESSING_QUEUE } from 'src/shared/common/ocr-enums.js';
-import { S3Service } from 'src/shared/infrastructure/aws/s3.service.js';
-import { TextractService } from 'src/shared/infrastructure/aws/textract.service.js';
-import DocumentEntity from 'src/shared/infrastructure/database/entities/document.entity.js';
-import { ClassificationService } from 'src/domains/classification/services/classification.service.js';
-import { PdfSplitterService } from 'src/shared/utils/pdf-splitter.service.js';
+import { OCR_PROCESSING_QUEUE } from '../../../../shared/common/ocr-enums.js';
+import { S3Service } from '../../../../shared/infrastructure/aws/s3.service.js';
+import { TextractService } from '../../../../shared/infrastructure/aws/textract.service.js';
+import DocumentEntity from '../../../../shared/infrastructure/database/entities/document.entity.js';
+import { ClassificationService } from '../../../classification/services/classification.service.js';
+import { PdfSplitterService } from '../../../../shared/utils/pdf-splitter.service.js';
 import { BatchUploadProcessor } from '../batch-upload.processor.js';
 
 describe('BatchUploadProcessor', () => {

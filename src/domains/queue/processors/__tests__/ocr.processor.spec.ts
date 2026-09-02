@@ -6,16 +6,16 @@ import {
   OCRFailureReason,
   OCRHistoryStatus,
   OCRStatus,
-} from 'src/shared/common/ocr-enums.js';
-import { AuditTrailService } from 'src/shared/contracts/audit-trail.service.abstract.js';
-import { S3Service } from 'src/shared/infrastructure/aws/s3.service.js';
-import { TextractService } from 'src/shared/infrastructure/aws/textract.service.js';
-import DocumentEntity from 'src/shared/infrastructure/database/entities/document.entity.js';
-import OCRRequestHistoryEntity from 'src/shared/infrastructure/database/entities/ocr-request-history.entity.js';
-import RequirementEntity from 'src/shared/infrastructure/database/entities/requirement.entity.js';
-import { ClassificationService } from 'src/domains/classification/services/classification.service.js';
-import { ExtractionService } from 'src/domains/extraction/services/extraction.service.js';
-import { ValidationService } from 'src/domains/validation/services/validation.service.js';
+} from '../../../../shared/common/ocr-enums.js';
+import { AuditTrailService } from '../../../../shared/contracts/audit-trail.service.abstract.js';
+import { S3Service } from '../../../../shared/infrastructure/aws/s3.service.js';
+import { TextractService } from '../../../../shared/infrastructure/aws/textract.service.js';
+import DocumentEntity from '../../../../shared/infrastructure/database/entities/document.entity.js';
+import OCRRequestHistoryEntity from '../../../../shared/infrastructure/database/entities/ocr-request-history.entity.js';
+import RequirementEntity from '../../../../shared/infrastructure/database/entities/requirement.entity.js';
+import { ClassificationService } from '../../../classification/services/classification.service.js';
+import { ExtractionService } from '../../../extraction/services/extraction.service.js';
+import { ValidationService } from '../../../validation/services/validation.service.js';
 import { OcrProcessor } from '../ocr.processor.js';
 
 describe('OcrProcessor', () => {

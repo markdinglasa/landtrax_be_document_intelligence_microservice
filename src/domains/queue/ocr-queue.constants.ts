@@ -1,4 +1,4 @@
-export { OCR_PROCESSING_QUEUE, OCR_BATCH_QUEUE } from 'src/shared/common/ocr-enums.js';
+export { OCR_PROCESSING_QUEUE, OCR_BATCH_QUEUE } from '../../shared/common/ocr-enums.js';
 
 export interface OcrJobData {
   documentId: string;

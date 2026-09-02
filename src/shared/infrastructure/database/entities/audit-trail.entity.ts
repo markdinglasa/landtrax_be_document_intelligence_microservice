@@ -1,4 +1,4 @@
-import { AuditTrailStatus } from 'src/shared/common/status';
+import { AuditTrailStatus } from '../../../common/status.js';
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Entities } from '../models/general.model';
 import User from './user.entity';

@@ -32,13 +32,17 @@ export class OcrController {
 
   @MessagePattern('ocr.status')
   async getStatus(@Payload() payload: { documentIds: string[] }) {
-    this.logger.log(`Received message: ocr.status for ${payload.documentIds?.length || 0} document(s)`);
+    this.logger.log(
+      `Received message: ocr.status for ${payload.documentIds?.length || 0} document(s)`,
+    );
     return this.ocrService.getStatus(payload.documentIds || []);
   }
 
   @MessagePattern('ocr.fields.update')
   async updateField(@Payload() dto: UpdateFieldDto) {
-    this.logger.log(`Received message: ocr.fields.update for docId=${dto.documentId}, field=${dto.fieldName}`);
+    this.logger.log(
+      `Received message: ocr.fields.update for docId=${dto.documentId}, field=${dto.fieldName}`,
+    );
     return this.ocrService.updateField(dto);
   }
 

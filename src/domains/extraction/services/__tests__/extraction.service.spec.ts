@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { BedrockService } from 'src/shared/infrastructure/aws/bedrock.service.js';
-import ExtractedFieldEntity from 'src/shared/infrastructure/database/entities/extracted-field.entity.js';
-import RequirementMappingEntity from 'src/shared/infrastructure/database/entities/requirement-mapping.entity.js';
+import { BedrockService } from '../../../../shared/infrastructure/aws/bedrock.service.js';
+import ExtractedFieldEntity from '../../../../shared/infrastructure/database/entities/extracted-field.entity.js';
+import RequirementMappingEntity from '../../../../shared/infrastructure/database/entities/requirement-mapping.entity.js';
 import { ExtractionService } from '../extraction.service.js';
 
 describe('ExtractionService', () => {

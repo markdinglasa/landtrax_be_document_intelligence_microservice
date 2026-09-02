@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import DocumentEntity from 'src/shared/infrastructure/database/entities/document.entity.js';
-import RequirementEntity from 'src/shared/infrastructure/database/entities/requirement.entity.js';
+import DocumentEntity from '../../shared/infrastructure/database/entities/document.entity.js';
+import RequirementEntity from '../../shared/infrastructure/database/entities/requirement.entity.js';
 import { IValidationService } from './services/validation.service.abstract.js';
 import { ValidationService } from './services/validation.service.js';
 

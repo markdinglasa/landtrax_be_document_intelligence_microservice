@@ -1,7 +1,7 @@
 import { ConfigService } from '@nestjs/config';
 import { config } from 'dotenv';
-import Entities from 'src/shared/infrastructure/database/entities';
 import { DataSource } from 'typeorm';
+import Entities from '../shared/infrastructure/database/entities/index.js';
 
 /* type: database configuration
       this is for database configuration, we can configure our database credential here

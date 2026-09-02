@@ -2,17 +2,17 @@
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { OCR_BATCH_QUEUE, OCR_PROCESSING_QUEUE } from 'src/shared/common/ocr-enums.js';
-import { AwsModule } from 'src/shared/infrastructure/aws/aws.module.js';
-import DocumentEntity from 'src/shared/infrastructure/database/entities/document.entity.js';
-import OCRRequestHistoryEntity from 'src/shared/infrastructure/database/entities/ocr-request-history.entity.js';
-import RequirementEntity from 'src/shared/infrastructure/database/entities/requirement.entity.js';
-import { InternalHttpModule } from 'src/shared/infrastructure/http/internal-http.module.js';
-import { IPdfSplitterService } from 'src/shared/utils/pdf-splitter.service.abstract.js';
-import { PdfSplitterService } from 'src/shared/utils/pdf-splitter.service.js';
-import { ClassificationModule } from 'src/domains/classification/classification.module.js';
-import { ExtractionModule } from 'src/domains/extraction/extraction.module.js';
-import { ValidationModule } from 'src/domains/validation/validation.module.js';
+import { OCR_BATCH_QUEUE, OCR_PROCESSING_QUEUE } from '../../shared/common/ocr-enums.js';
+import { AwsModule } from '../../shared/infrastructure/aws/aws.module.js';
+import DocumentEntity from '../../shared/infrastructure/database/entities/document.entity.js';
+import OCRRequestHistoryEntity from '../../shared/infrastructure/database/entities/ocr-request-history.entity.js';
+import RequirementEntity from '../../shared/infrastructure/database/entities/requirement.entity.js';
+import { InternalHttpModule } from '../../shared/infrastructure/http/internal-http.module.js';
+import { IPdfSplitterService } from '../../shared/utils/pdf-splitter.service.abstract.js';
+import { PdfSplitterService } from '../../shared/utils/pdf-splitter.service.js';
+import { ClassificationModule } from '../classification/classification.module.js';
+import { ExtractionModule } from '../extraction/extraction.module.js';
+import { ValidationModule } from '../validation/validation.module.js';
 import { BatchUploadProcessor } from './processors/batch-upload.processor.js';
 import { OcrProcessor } from './processors/ocr.processor.js';
 

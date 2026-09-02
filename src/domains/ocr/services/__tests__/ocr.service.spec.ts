@@ -6,12 +6,12 @@ import {
   OCR_PROCESSING_QUEUE,
   OCRAuditAction,
   OCRStatus,
-} from 'src/shared/common/ocr-enums.js';
-import { AuditTrailService } from 'src/shared/contracts/audit-trail.service.abstract.js';
-import DocumentEntity from 'src/shared/infrastructure/database/entities/document.entity.js';
-import ExtractedFieldEntity from 'src/shared/infrastructure/database/entities/extracted-field.entity.js';
-import { ExtractionService } from 'src/domains/extraction/services/extraction.service.js';
-import { ValidationService } from 'src/domains/validation/services/validation.service.js';
+} from '../../../../shared/common/ocr-enums.js';
+import { AuditTrailService } from '../../../../shared/contracts/audit-trail.service.abstract.js';
+import DocumentEntity from '../../../../shared/infrastructure/database/entities/document.entity.js';
+import ExtractedFieldEntity from '../../../../shared/infrastructure/database/entities/extracted-field.entity.js';
+import { ExtractionService } from '../../../extraction/services/extraction.service.js';
+import { ValidationService } from '../../../validation/services/validation.service.js';
 import { ProcessBatchDto } from '../../dtos/process-batch.dto.js';
 import { ProcessReplacementDto } from '../../dtos/process-replacement.dto.js';
 import { UpdateFieldDto } from '../../dtos/update-field.dto.js';

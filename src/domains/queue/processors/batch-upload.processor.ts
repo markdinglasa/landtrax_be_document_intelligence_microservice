@@ -4,12 +4,12 @@ import { Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Job, Queue } from 'bullmq';
 import { Repository } from 'typeorm';
-import { OCR_BATCH_QUEUE, OCR_PROCESSING_QUEUE } from 'src/shared/common/ocr-enums.js';
-import { S3Service } from 'src/shared/infrastructure/aws/s3.service.js';
-import { TextractService } from 'src/shared/infrastructure/aws/textract.service.js';
-import DocumentEntity from 'src/shared/infrastructure/database/entities/document.entity.js';
-import { ClassificationService } from 'src/domains/classification/services/classification.service.js';
-import { PdfSplitterService } from 'src/shared/utils/pdf-splitter.service.js';
+import { OCR_BATCH_QUEUE, OCR_PROCESSING_QUEUE } from '../../../shared/common/ocr-enums.js';
+import { S3Service } from '../../../shared/infrastructure/aws/s3.service.js';
+import { TextractService } from '../../../shared/infrastructure/aws/textract.service.js';
+import DocumentEntity from '../../../shared/infrastructure/database/entities/document.entity.js';
+import { ClassificationService } from '../../classification/services/classification.service.js';
+import { PdfSplitterService } from '../../../shared/utils/pdf-splitter.service.js';
 import { BatchUploadJobData, OcrJobData } from '../ocr-queue.constants.js';
 
 @Processor(OCR_BATCH_QUEUE)
