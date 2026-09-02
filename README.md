@@ -1,8 +1,8 @@
-# Analytics & Reports Microservice (NestJS)
+# Document Intelligence Microservice (NestJS)
 
-Consolidates the Dashboard, Widgets, and all Reporting modules.
+Formerly known as the "OCR Module", this microservice is the analytical brain of the Landtrax platform. It uses advanced machine learning, optical character recognition (OCR), and AI to extract text, validate requirements, summarize contents, and detect potential fraud in uploaded documents.
 
-Unlike operational microservices that focus on writing data (OLTP), this microservice is purely analytical (OLAP). Its primary purpose is to aggregate, filter, and export massive amounts of data from across the entire Landtrax platform without degrading the performance of the core business services.
+Because this service performs heavy CPU/GPU-bound computations and relies on expensive 3rd-party AI APIs (like AWS Textract or OpenAI), its architecture is entirely **asynchronous and event-driven**, heavily utilizing message queues (BullMQ/RabbitMQ).
 
 ---
 
@@ -11,26 +11,31 @@ Unlike operational microservices that focus on writing data (OLTP), this microse
 _Note: In alignment with NestJS DDD best practices, the Dashboard and Reporting modules have been merged into a single microservice since they share the same architectural goal: Heavy Data Aggregation._
 
 ```text
-/analytics-reports-microservice
+/document-intelligence-microservice
 ├── src/
 │   ├── config/
-│   │   ├── database-read-replica.config.ts <-- CRITICAL: Must point to a Read-Replica
 │   │   ├── redis.config.ts
 │   │   └── app.config.ts
 │   ├── domains/
-│   │   ├── dashboard/           <-- Bounded Context: Dashboard & Widgets
+│   │   ├── classification/
 │   │   │   ├── application/     <-- Use cases, Services
 │   │   │   ├── domain/          <-- Entities, Value Objects
 │   │   │   ├── infrastructure/  <-- Repositories, Adapters
 │   │   │   ├── presentation/    <-- Controllers
 │   │   │   └── dashboard.module.ts
-│   │   ├── reports/             <-- Bounded Context: Report Exports
+│   │   ├── extraction/   
 │   │   │   ├── application/
 │   │   │   ├── domain/
 │   │   │   ├── infrastructure/
 │   │   │   ├── presentation/
-│   │   │   └── reports.module.ts
-│   │   └── data-sync/           <-- Phase 2 CQRS: Listens to broker to build local read models
+│   │   │   └── extraction.module.ts
+│   │   ├── queue/   
+│   │   │   ├── application/
+│   │   │   ├── domain/
+│   │   │   ├── infrastructure/
+│   │   │   ├── presentation/
+│   │   │   └── extraction.module.ts
+│   │   └── validation/
 │   │       ├── application/
 │   │       ├── domain/
 │   │       ├── infrastructure/
@@ -51,76 +56,73 @@ _Note: In alignment with NestJS DDD best practices, the Dashboard and Reporting 
 └── test/
 ```
 
+
 ---
 
 ## 2. Dependencies Analysis
 
-### Upstream Dependencies (Who depends on Analytics & Reports)
+### Upstream Dependencies (Who depends on Document Intelligence)
+Because this is an event-driven "Worker" microservice, no service strictly depends on it via synchronous HTTP calls.
+- **Document Library & Transaction Services:** Rely on Document Intelligence to *eventually* process uploaded documents and emit a `ProcessingCompleteEvent` so they can update the UI to show the extracted fields or validation status.
 
-- **Frontend / Administrators:** Managers and Admins rely on this service to view operational dashboards and download massive CSV/Excel/PDF reports.
-
-### Downstream Dependencies (What Analytics & Reports depends on)
-
-- **Database (PostgreSQL/MySQL):** **Shared Database (Phase 1)** - Relies heavily on the database to query aggregated metrics.
-- **Cloud Object Storage (AWS S3):** For temporarily storing massive generated reports before the user downloads them.
-- **Message Broker (RabbitMQ/Kafka/BullMQ):** Crucial for Phase 2 preparation (CQRS).
+### Downstream Dependencies (What Document Intelligence depends on)
+- **External AI/OCR APIs:** AWS Textract, Google Cloud Vision, OpenAI API, etc., for the actual heavy lifting.
+- **Message Broker & Redis:** **CRITICAL**. Redis + BullMQ (or RabbitMQ) acts as the queue that feeds documents into this service at a controlled rate.
+- **Cloud Object Storage (AWS S3):** Needs to download the physical document binary to run processing.
+- **Database (PostgreSQL/MySQL):** **Shared Database (Phase 1)** - Shares the DB to write `ExtractedFields` and read `Requirements`.
 
 ---
 
 ## 3. Risk & Impact Analysis (Phase 1: Shared Database)
 
-| Risk ID    | Category     | Description                                                                                                                                                                                                                                                                   | Impact       |
-| ---------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
-| **RSK-01** | Database     | **The "Query of Death":** Running a report that aggregates 5 years of `Transactions`, `Users`, and `Payments` using massive `JOIN` and `GROUP BY` statements will lock the tables in the Shared Database, causing the entire platform (including IAM logins) to freeze.       | **CRITICAL** |
-| **RSK-02** | Compute      | **OOM (Out of Memory) Crashes:** Fetching 500,000 rows from the database into Node.js memory to generate an Excel/CSV file will instantly exhaust the server's RAM, causing a fatal crash.                                                                                    | **CRITICAL** |
-| **RSK-03** | Architecture | **Phase 2 Decoupling Nightmare:** In Phase 1, you can just `JOIN` tables. But when Phase 2 moves `Users` and `Transactions` to separate databases, this microservice's queries will instantly break because you cannot perform SQL `JOIN`s across different database servers. | **HIGH**     |
+| Risk ID | Category | Description | Impact |
+|---------|----------|-------------|--------|
+| **RSK-01** | Compute | **CPU Starvation:** Running text parsing or regex matching on 100-page legal documents is extremely CPU intensive. If 50 documents arrive at once, the Node.js event loop will block, causing the service to crash. | **CRITICAL** |
+| **RSK-02** | Financial | **Runaway API Costs (Rate Limiting):** External AI APIs (like AWS Textract) charge per page. If a malicious user spams document uploads, or if a bug causes an infinite processing loop, you will incur massive billing spikes and `429 Too Many Requests` API bans. | **HIGH** |
+| **RSK-03** | Architecture| **Timeout Failures:** AI models take seconds to minutes to run. If another service waits for an HTTP response from this service, the connection will invariably timeout. | **HIGH** |
 
 ---
 
 ## 4. Mitigations
 
-### MIT-01: Read-Replica Enforcement (Addresses RSK-01)
+### MIT-01: Strict Queue Concurrency (Addresses RSK-01 & RSK-03)
+- **Strategy:** Never process requests synchronously via HTTP. Control the flow of work.
+- **Implementation:** Utilize **BullMQ** (which is already in your `package.json`). When the Document Library fires a `DocumentUploadedEvent`, it lands in a Redis queue. The Document Intelligence service acts as a "Worker" that consumes jobs from the queue with strict concurrency (e.g., `concurrency: 5`). This ensures the CPU is never overwhelmed, and HTTP requests never timeout.
 
-- **Strategy:** Protect the primary operational database.
-- **Implementation:** Even though you are using a Shared Database in Phase 1, this microservice MUST be configured to connect to a **Read-Replica** of the database. All complex aggregations and reports will run on the replica, ensuring that even if a query takes 10 minutes to run, it will never lock the primary writer node that handles live traffic.
+### MIT-02: Exponential Backoff & Circuit Breakers (Addresses RSK-02)
+- **Strategy:** Gracefully handle external API limits and failures.
+- **Implementation:** If AWS Textract returns a `429 Rate Limit Exceeded` error, the BullMQ processor must catch the error and throw it back into the queue with an **Exponential Backoff** retry strategy (e.g., wait 10s, then 30s, then 2m). Use Circuit Breakers to stop processing entirely if the external API is offline.
 
-### MIT-02: Node.js Data Streaming & Asynchronous Exports (Addresses RSK-02)
-
-- **Strategy:** Never load an entire report into RAM.
-- **Implementation:**
-  1. For small reports, use Node.js Streams (e.g., streaming rows directly from TypeORM to `fast-csv` to the HTTP Response). Memory usage will remain flat regardless of file size.
-  2. For massive reports, make the endpoint **asynchronous**. The endpoint returns `202 Accepted`. A background worker streams the query to an S3 file. When finished, the Alert Service sends the Admin an email with a download link.
-
-### MIT-03: CQRS & Materialized Views (Addresses RSK-01 & RSK-03)
-
-- **Strategy:** Prepare the microservice to own its own data.
-- **Implementation:** Introduce the **CQRS (Command Query Responsibility Segregation)** pattern. The `/data-sync` module listens to the Message Broker for domain events (`TransactionCreated`, `UserCreated`). It uses these events to build denormalized, flattened "Read Models" in its own dedicated tables. This makes queries lightning fast and completely decouples it from the other microservices' databases for Phase 2.
+### MIT-03: Event-Driven Choreography (Addresses RSK-03)
+- **Strategy:** Once processing finishes, notify the system rather than returning a response.
+- **Implementation:** When the Fraud Detection and Extraction services finish analyzing a document, the microservice writes the `extracted_fields` to the database and publishes a `DocumentProcessedEvent`. The Transaction service listens to this event to automatically move the staging phase forward if all requirements are met!
 
 ---
 
 ## 5. Microservice Cross-Domain Dependencies
 
-This section strictly outlines what external Microservices the **Analytics & Reports Service** relies upon, identifying the exact source and the services consuming them to prevent architectural gaps.
+This section strictly outlines what external Microservices the **Document Intelligence Service** relies upon, identifying the exact source and the Intelligence services consuming them to prevent architectural gaps.
 
-### 1. Alert Microservice (Email & Notification Services)
+### 1. Document Library Microservice
+**Purpose:** To retrieve the physical document for processing and write the extracted metadata back to the document record.
+**Source Required:** `Document Service`, `Storage Service`
+**Used By Intelligence Services:**
+- `extraction.service.ts`: To pull the S3 Presigned URL, download the PDF into memory, run OCR, and map the results to the `ExtractedFields` table.
+**Method of Invocation:** Asynchronous (Triggered by Message Broker).
 
-**Purpose:** To notify administrators when long-running, massive report generations are complete.
-**Source Required:** `Alert Service` (`email.service.ts`)
-**Used By Reports Services:**
+### 2. Reference & Transaction Microservices
+**Purpose:** To know what a document is *supposed* to contain so it can validate it.
+**Source Required:** `Requirement Service` (Reference), `Staging Service` (Transaction)
+**Used By Intelligence Services:**
+- `validation.service.ts`: When analyzing an uploaded document (e.g., "Proof of Identity"), this service needs to pull the exact rules from the `Requirement Service` (e.g., "Must contain a photo, must not be expired") to check if the extracted text meets the criteria.
+**Method of Invocation:** Synchronous (Direct Database Query via Shared DB in Phase 1, or Redis Cache lookup).
 
-- `/reports/services`: When an asynchronous report generation finishes uploading to S3, this service fires an event to the Alert microservice to email the user a temporary Presigned Download URL.
-  **Method of Invocation:** Strictly Asynchronous (via Message Broker).
-
-### 2. Audt Microservice
-
-**Purpose:** Compliance logging to track the exfiltration of sensitive company data.
-**Source Required:** `AuditTrail Service` (`audit.service.ts` or `@AuditDescription()`)
-**Used By Dashboard & Reports Services:**
-
-- `/reports/services`: To log exactly _who_ requested a massive export of User Data or Financial Records, and _when_ they downloaded it.
-  **Method of Invocation:** Strictly Asynchronous (via Message Broker).
-
-_(Note: Because this service reads data directly from the Read-Replica or its own CQRS read-models, it does not make synchronous HTTP calls to IAM, Transaction, or Payment to gather data)._
+### 3. Alert Module (Email & Notification Services)
+**Purpose:** To trigger immediate alarms if severe fraud or anomalies are detected.
+**Source Required:** `Alert Service` (`notification.service.ts`)
+**Used By Intelligence Services:**
+- `fraud-detection.service.ts`: If the system detects a forged signature or a photoshopped title document, it immediately fires an alert to the platform administrators for manual review.
+**Method of Invocation:** Strictly Asynchronous (via Message Broker).
 
 ## 6. Installation & Setup Guide
 

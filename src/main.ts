@@ -7,18 +7,19 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.createMicroservice(AppModule); // should be a Factory Microservice
 
-  app.setGlobalPrefix('api');
+  //app.setGlobalPrefix('api');
   app.useGlobalPipes(
     new ValidationPipe({ whitelist: true, transform: true, forbidNonWhitelisted: false }),
   );
 
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
-  const port = process.env.PORT ?? 3003;
-  await app.listen(port);
+  const port = process.env.PORT ?? 5007;
+  await app.listen();
+  //await app.getHttpAdapter().getInstance().listen(port);
 
-  console.log(`Analytics & Reports Microservice running on port ${port}`);
+  console.log(`Document Intelligence Microservice running on port ${port}`);
 }
 
-bootstrap();
+void bootstrap(); // nosonar

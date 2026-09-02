@@ -86,5 +86,8 @@ export enum Entities {
   SYSTEM_SETTINGS = 'SystemSettings',
 
   // REPORTS
-  EXPORT_AUDIT_JOB = 'AuditExportJob'
+  EXPORT_AUDIT_JOB = 'AuditExportJob',
+
+  // Document Intelligence
+  OCR_REQUEST_HISTORY = 'OCRRequestHistory',
 }

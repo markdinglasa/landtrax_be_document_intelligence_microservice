@@ -3,6 +3,7 @@ export * from './base';
 export * from './formatter';
 export * from './interfaces';
 export * from './meta';
+export * from './ocr-enums';
 export * from './permissions';
 export * from './response';
 export * from './staging';

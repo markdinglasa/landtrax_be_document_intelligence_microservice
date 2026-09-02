@@ -8,10 +8,12 @@ import CompanyEntity from "./company.entity";
 import CourierProviderEntity from "./courier-provider.entity";
 import DocumentEntity from "./document.entity";
 import EntityCodeEntity from "./entity-code.entity";
+import ExtractedFieldEntity from "./extracted-field.entity";
 import FeedbackEntity from "./feedback.entity";
 import LandtraxAddressEntity from "./landtrax-address.entity";
 import RegistryOfDeedEntity from "./location";
 import MayaCheckoutEntity from "./maya-checkout.entity";
+import OCRRequestHistoryEntity from "./ocr-request-history.entity";
 import PayTypeEntity from "./pay-type.entity";
 import ProposalReferenceEntity from "./proposal-reference.entity";
 import RecipientDocumentsEntity from "./recipient-documents.entity";
@@ -43,9 +45,11 @@ export default {
   CourierProviderEntity,
   DocumentEntity,
   EntityCodeEntity,
+  ExtractedFieldEntity,
   FeedbackEntity,
   LandtraxAddressEntity,
   MayaCheckoutEntity,
+  OCRRequestHistoryEntity,
   PayTypeEntity,
   ProposalReferenceEntity,
   RecipientDocumentsEntity,

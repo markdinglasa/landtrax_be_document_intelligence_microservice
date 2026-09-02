@@ -88,4 +88,7 @@ export enum ENTITY {
 
   // system address
   LANDTRAX_ADDRESS = 'LandtraxAddress',
+
+  // document intelligence
+  OCR_REQUEST_HISTORY = 'OCRRequestHistory',
 }

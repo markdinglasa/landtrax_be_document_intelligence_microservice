@@ -1,26 +1,24 @@
+// @ts-ignore
+import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { BullModule } from '@nestjs/bullmq';
-
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-
-import appConfig from './config/typeorm/app-config';
-import redisConfig from './config/redis-config';
-import { getTypeOrmConfig } from './config/typeorm/config';
-
-import { DashboardModule } from './domains/dashboard/dashboard.module';
-import { ReportsModule } from './domains/reports/reports.module';
+import { AppController } from './app.controller.js';
+import { AppService } from './app.service.js';
+import { getTypeOrmConfig } from './config/app.config.js';
+import awsConfig from './config/aws.config.js';
+import redisConfig from './config/redis.config.js';
+import { AwsModule } from './shared/infrastructure/aws/aws.module.js';
+import { OcrModule } from './domains/ocr/ocr.module.js';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       envFilePath: ['.env'],
       isGlobal: true,
-      load: [appConfig, redisConfig],
+      load: [redisConfig, awsConfig],
     }),
-    
+
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => getTypeOrmConfig(configService),
@@ -39,7 +37,9 @@ import { ReportsModule } from './domains/reports/reports.module';
             host: configService.get<string>('redis.host'),
             port: configService.get<number>('redis.port'),
             password: configService.get<string>('redis.password'),
-            ...(isCluster ? { clusterRetryStrategy: (times) => Math.min(times * 50, 2000) } : {}),
+            ...(isCluster
+              ? { clusterRetryStrategy: (times: number) => Math.min(times * 50, 2000) }
+              : {}),
             ...(useTls ? { tls: { rejectUnauthorized } } : {}),
           },
         };
@@ -47,8 +47,8 @@ import { ReportsModule } from './domains/reports/reports.module';
       inject: [ConfigService],
     }),
 
-    DashboardModule,
-    ReportsModule,
+    AwsModule,
+    OcrModule,
   ],
   controllers: [AppController],
   providers: [AppService],

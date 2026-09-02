@@ -1,10 +1,11 @@
-import { AfterLoad, Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { AfterLoad, Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { Entities } from '../models/general.model';
 import { LineEntity } from './general.entity';
 import RequirementEntity from './requirement.entity';
 import TransactionServiceEntity from './transaction-service.entity';
 import TransactionEntity from './transaction.entity';
 import UserEntity from './user.entity';
+import ExtractedFieldEntity from './extracted-field.entity.js';
 
 @Entity(Entities.DOCUMENT)
 export default class DocumentEntity extends LineEntity {
@@ -98,6 +99,12 @@ export default class DocumentEntity extends LineEntity {
   })
   @JoinColumn({ name: 'CreatedBy', referencedColumnName: 'id' })
   createdByUser?: UserEntity;
+
+  @OneToMany(() => ExtractedFieldEntity, (extractedFields) => extractedFields.document, {
+    eager: false,
+    cascade: ['insert', 'update', 'remove'],
+  })
+  extractedFields?: ExtractedFieldEntity[];
 
   // Virtual property to get tags array (populated via documentTags)
   isAllExtractedFieldsFilled?: boolean;

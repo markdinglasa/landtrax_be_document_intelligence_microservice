@@ -74,7 +74,6 @@ export const getTypeOrmConfig = (configService: ConfigService): any => {
   };
 };
 
-
 config({ path: ['.dev.env', '.env'] });
 
 const configService = new ConfigService();
