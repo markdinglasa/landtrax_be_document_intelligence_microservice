@@ -1,4 +1,4 @@
-import { EntityCodeStatus } from 'src/shared/common/status';
+import { EntityCodeStatus } from '../../../common/status.js';
 import { AfterLoad, Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 import { Entities } from '../models/general.model';
 import CompanyEntity from './company.entity';

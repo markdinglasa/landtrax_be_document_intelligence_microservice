@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { OCRFailureReason } from '../../../shared/common/ocr-enums.js';
 import DocumentEntity from '../../../shared/infrastructure/database/entities/document.entity.js';
 import RequirementEntity from '../../../shared/infrastructure/database/entities/requirement.entity.js';
+import RequirementMappingEntity from '../../../shared/infrastructure/database/entities/requirement-mapping.entity.js';
 import { IsNull, Repository } from 'typeorm';
 import { IValidationService } from './validation.service.abstract.js';
 
@@ -15,6 +16,8 @@ export class ValidationService extends IValidationService {
     private readonly documentRepository: Repository<DocumentEntity>,
     @InjectRepository(RequirementEntity)
     private readonly requirementRepository: Repository<RequirementEntity>,
+    @InjectRepository(RequirementMappingEntity)
+    private readonly requirementMappingRepo: Repository<RequirementMappingEntity>,
   ) {
     super();
   }
@@ -66,14 +69,18 @@ export class ValidationService extends IValidationService {
   }
 
   /**
-   * Checks if a file is a duplicate for a transaction.
+   * Checks if a file or requirement is a duplicate for a transaction.
    */
+  // SONARQUBE ISSUE - Refactor this function to reduce its Cognitive Complexity from 24 to the 15 allowed. [+10 locations]sonarqube
   async checkDuplicate(
     fileName: string,
     fileSize: number,
     transactionId: string,
+    requirementId?: string | null,
+    serviceId?: string | null,
   ): Promise<{ isDuplicate: boolean; message?: string }> {
     try {
+      // 1. Exact file duplicate check (FileName + FileSize) within transaction
       const existingDoc = await this.documentRepository.findOne({
         where: {
           originalFileName: fileName,
@@ -88,6 +95,65 @@ export class ValidationService extends IValidationService {
           isDuplicate: true,
           message: 'The selected file has already been uploaded for this transaction.',
         };
+      }
+
+      // 2. Requirement / Requirement-Mapping duplicate check within transaction
+      if (requirementId) {
+        const existingReqDoc = await this.documentRepository.findOne({
+          where: {
+            transactionId: transactionId,
+            requirementId: requirementId,
+            deletedDate: IsNull(),
+          },
+        });
+
+        if (existingReqDoc) {
+          const req = await this.requirementRepository.findOne({
+            where: { id: requirementId, deletedDate: IsNull() },
+          });
+          const reqName = req?.name || 'specified';
+          return {
+            isDuplicate: true,
+            message: `The requirement '${reqName}' has already been processed for this transaction.`,
+          };
+        }
+
+        if (serviceId) {
+          const mapping = await this.requirementMappingRepo.findOne({
+            where: [
+              { sourceRequirementId: requirementId, serviceId: serviceId, deletedDate: IsNull() },
+              { targetRequirementId: requirementId, serviceId: serviceId, deletedDate: IsNull() },
+            ],
+          });
+
+          if (mapping) {
+            const relatedReqId =
+              mapping.sourceRequirementId === requirementId
+                ? mapping.targetRequirementId
+                : mapping.sourceRequirementId;
+
+            if (relatedReqId && relatedReqId !== requirementId) {
+              const existingMappedDoc = await this.documentRepository.findOne({
+                where: {
+                  transactionId: transactionId,
+                  requirementId: relatedReqId,
+                  deletedDate: IsNull(),
+                },
+              });
+
+              if (existingMappedDoc) {
+                const req = await this.requirementRepository.findOne({
+                  where: { id: requirementId, deletedDate: IsNull() },
+                });
+                const reqName = req?.name || 'specified';
+                return {
+                  isDuplicate: true,
+                  message: `The requirement '${reqName}' has already been processed for this transaction.`,
+                };
+              }
+            }
+          }
+        }
       }
 
       return { isDuplicate: false };

@@ -1,4 +1,4 @@
-import { BusinessType } from 'src/shared/common';
+import { BusinessType } from '../../../common/status.js';
 import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
 import { Entities } from '../models/general.model';
 import EntityCodeEntity from './entity-code.entity';

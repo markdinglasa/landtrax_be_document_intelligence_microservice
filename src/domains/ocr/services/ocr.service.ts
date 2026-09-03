@@ -67,12 +67,13 @@ export class OcrService extends IOcrService {
     }[] = [];
 
     for (const doc of dto.documents) {
-      // 1. Duplicate check (FileName + FileSize)
-      // + ExtractedFields check (AC 10-17) if requirement has exactly the same fields and values as an existing document in the same transaction
+      // 1. Duplicate check (FileName + FileSize + Requirement & Mapping match)
       const dupCheck = await this.validationService.checkDuplicate(
         doc.fileName,
         doc.fileSize,
         dto.transactionId,
+        doc.requirementId,
+        dto.serviceId,
       );
 
       if (dupCheck.isDuplicate) {

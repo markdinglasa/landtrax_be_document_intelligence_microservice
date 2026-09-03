@@ -126,6 +126,42 @@ describe('OcrService', () => {
       expect(result.results[1].message).toContain('already been uploaded');
       expect(mockOcrQueue.add).toHaveBeenCalledTimes(1);
     });
+
+    it('should pass requirementId and serviceId to checkDuplicate and reject duplicate requirement', async () => {
+      mockValidationService.checkDuplicate.mockResolvedValueOnce({
+        isDuplicate: true,
+        message: "The requirement 'Transfer Certificate of Title' has already been processed for this transaction.",
+      });
+
+      const dto: ProcessBatchDto = {
+        transactionId: 'tx-100',
+        serviceId: 'srv-1',
+        userId: 'user-1',
+        documents: [
+          {
+            documentId: 'doc-dup-req',
+            fileName: 'another-tct.pdf',
+            fileSize: 1024,
+            fileType: 'application/pdf',
+            s3Key: 'docs/tct.pdf',
+            requirementId: 'req-tct',
+          },
+        ],
+      };
+
+      const result = await service.processBatch(dto);
+
+      expect(mockValidationService.checkDuplicate).toHaveBeenCalledWith(
+        'another-tct.pdf',
+        1024,
+        'tx-100',
+        'req-tct',
+        'srv-1',
+      );
+      expect(result.results[0].status).toBe('REJECTED');
+      expect(result.results[0].message).toContain('Transfer Certificate of Title');
+      expect(mockOcrQueue.add).not.toHaveBeenCalled();
+    });
   });
 
   describe('processReplacement', () => {

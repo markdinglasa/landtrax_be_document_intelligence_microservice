@@ -7,11 +7,13 @@ export abstract class IValidationService {
     requirementId: string,
   ): Promise<{ valid: boolean; message?: string }>;
 
-  /** Checks if a file is a duplicate for a transaction. */
+  /** Checks if a file or requirement is a duplicate for a transaction. */
   abstract checkDuplicate(
     fileName: string,
     fileSize: number,
     transactionId: string,
+    requirementId?: string | null,
+    serviceId?: string | null,
   ): Promise<{ isDuplicate: boolean; message?: string }>;
 
   /** Pre-checks for unreadable conditions (blank buffer, encrypted PDF). */

@@ -1,5 +1,5 @@
-import { CollectionStatus, TransactionType, USER_TYPE } from 'src/shared/common/app-enums';
-import { formatToUserDate } from 'src/utils/date-utils';
+import { CollectionStatus, TransactionType, USER_TYPE } from '../../../common/app-enums.js';
+import { formatToUserDate } from '../../../../utils/date-utils.js';
 import { AfterLoad, Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { Entities } from '../models/general.model';
 import CollectionEntity from './collection.entity';

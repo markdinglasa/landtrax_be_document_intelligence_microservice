@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable, NestMiddleware } from '@nestjs/c
 import { NextFunction, Request, Response } from 'express';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
-import { SecurityConfig } from 'src/shared/utils/security-config';
+import { SecurityConfig } from '../utils/security-config.js';
 
 @Injectable()
 export class SecurityMiddleware implements NestMiddleware {

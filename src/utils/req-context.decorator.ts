@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { decode } from 'jsonwebtoken';
-import { CustomRequest } from 'src/shared/common';
+import { CustomRequest } from '../shared/common/index.js';
 
 export class RequestContextDto {
   ip!: string;

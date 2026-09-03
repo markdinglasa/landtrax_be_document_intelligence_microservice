@@ -1,5 +1,5 @@
-import { USER_TYPE, UserStatus } from 'src/shared/common/app-enums';
-import { mainRoleTransform } from 'src/utils';
+import { USER_TYPE, UserStatus } from '../../../common/app-enums.js';
+import { mainRoleTransform } from '../../../../utils/index.js';
 import { AfterLoad, Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { ENTITY } from '../models/general-model';
 import AuditTrailEntity from './audit-trail.entity';

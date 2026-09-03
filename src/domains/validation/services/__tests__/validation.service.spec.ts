@@ -3,12 +3,14 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { OCRFailureReason } from '../../../../shared/common/ocr-enums.js';
 import DocumentEntity from '../../../../shared/infrastructure/database/entities/document.entity.js';
 import RequirementEntity from '../../../../shared/infrastructure/database/entities/requirement.entity.js';
+import RequirementMappingEntity from '../../../../shared/infrastructure/database/entities/requirement-mapping.entity.js';
 import { ValidationService } from '../validation.service.js';
 
 describe('ValidationService', () => {
   let service: ValidationService;
   let mockDocRepo: any;
   let mockReqRepo: any;
+  let mockReqMapRepo: any;
 
   beforeEach(async () => {
     mockDocRepo = {
@@ -19,11 +21,16 @@ describe('ValidationService', () => {
       findOne: jest.fn(),
     };
 
+    mockReqMapRepo = {
+      findOne: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ValidationService,
         { provide: getRepositoryToken(DocumentEntity), useValue: mockDocRepo },
         { provide: getRepositoryToken(RequirementEntity), useValue: mockReqRepo },
+        { provide: getRepositoryToken(RequirementMappingEntity), useValue: mockReqMapRepo },
       ],
     }).compile();
 
@@ -39,7 +46,7 @@ describe('ValidationService', () => {
   });
 
   describe('checkDuplicate', () => {
-    it('should return isDuplicate=true with exact message when duplicate exists (AC 30-32)', async () => {
+    it('should return isDuplicate=true with exact message when duplicate file exists (AC 30-32)', async () => {
       mockDocRepo.findOne.mockResolvedValueOnce({
         id: 'doc-1',
         originalFileName: 'title.pdf',
@@ -53,10 +60,44 @@ describe('ValidationService', () => {
       expect(result.message).toBe('The selected file has already been uploaded for this transaction.');
     });
 
-    it('should return isDuplicate=false when file is not duplicate', async () => {
-      mockDocRepo.findOne.mockResolvedValueOnce(null);
+    it('should return isDuplicate=true when requirement is already processed in transaction', async () => {
+      mockDocRepo.findOne
+        .mockResolvedValueOnce(null) // no file duplicate
+        .mockResolvedValueOnce({ id: 'doc-existing', requirementId: 'req-1', transactionId: 'tx-123' }); // requirement duplicate
 
-      const result = await service.checkDuplicate('new-doc.pdf', 2048, 'tx-123');
+      mockReqRepo.findOne.mockResolvedValueOnce({ id: 'req-1', name: 'Transfer Certificate of Title' });
+
+      const result = await service.checkDuplicate('new-title.pdf', 2048, 'tx-123', 'req-1');
+
+      expect(result.isDuplicate).toBe(true);
+      expect(result.message).toBe("The requirement 'Transfer Certificate of Title' has already been processed for this transaction.");
+    });
+
+    it('should return isDuplicate=true when mapped requirement is already processed in transaction', async () => {
+      mockDocRepo.findOne
+        .mockResolvedValueOnce(null) // no file duplicate
+        .mockResolvedValueOnce(null) // no direct requirement duplicate
+        .mockResolvedValueOnce({ id: 'doc-mapped', requirementId: 'req-target', transactionId: 'tx-123' }); // mapped requirement duplicate
+
+      mockReqMapRepo.findOne.mockResolvedValueOnce({
+        sourceRequirementId: 'req-source',
+        targetRequirementId: 'req-target',
+        serviceId: 'srv-1',
+      });
+
+      mockReqRepo.findOne.mockResolvedValueOnce({ id: 'req-source', name: 'Deed of Absolute Sale' });
+
+      const result = await service.checkDuplicate('deed.pdf', 2048, 'tx-123', 'req-source', 'srv-1');
+
+      expect(result.isDuplicate).toBe(true);
+      expect(result.message).toBe("The requirement 'Deed of Absolute Sale' has already been processed for this transaction.");
+    });
+
+    it('should return isDuplicate=false when file and requirement are not duplicates', async () => {
+      mockDocRepo.findOne.mockResolvedValue(null);
+      mockReqMapRepo.findOne.mockResolvedValue(null);
+
+      const result = await service.checkDuplicate('new-doc.pdf', 2048, 'tx-123', 'req-1', 'srv-1');
 
       expect(result.isDuplicate).toBe(false);
       expect(result.message).toBeUndefined();
