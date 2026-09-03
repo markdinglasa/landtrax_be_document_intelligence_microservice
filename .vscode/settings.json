@@ -1,0 +1,20 @@
+{
+  "conventionalCommits.scopes": ["INIT", "scripts", "SETUP"],
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit",
+    "source.fixAll.eslint": "explicit"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "codetogether.virtualCursorJoin": "sharedVirtualCursor",
+  "sonarlint.connectedMode.project": {
+    "connectionId": "https-sonarqube-dev-lares-com-ph-",
+    "projectKey": "landtrax_elodgement_elodgement_landtrax_be_af951693-1b97-4847-9ee4-3aab1cd3178c"
+  }
+}
