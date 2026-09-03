@@ -99,6 +99,21 @@ describe('ExtractionService', () => {
       expect(saved[1].fieldValue).toBeNull();
       expect(saved[1].isUserModified).toBe(false);
     });
+
+    it('should filter out entries with empty or invalid fieldName', async () => {
+      const fields = [
+        { fieldName: '', value: 'ignored', confidence: 0 },
+        { fieldName: 'Valid Field', value: 'Valid Value', confidence: 0.9 },
+        // @ts-ignore
+        { fieldName: null, value: 'ignored', confidence: 0 },
+      ];
+
+      const saved = await service.saveExtractedFields('doc-100', fields as any);
+
+      expect(saved).toHaveLength(1);
+      expect(saved[0].fieldName).toBe('Valid Field');
+      expect(saved[0].fieldValue).toBe('Valid Value');
+    });
   });
 
   describe('checkUserModifiedFields', () => {

@@ -1,15 +1,17 @@
+import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 
 import {
-  IBedrockService,
   ClassificationResult,
   FieldExtractionResult,
+  IBedrockService,
 } from './bedrock.service.abstract.js';
 
 export type { ClassificationResult, FieldExtractionResult };
-
+function isNullOrUndefined(field: { value: string | null }): string | null {
+  return field.value === null ? null : String(field.value).trim();
+}
 @Injectable()
 export class BedrockService extends IBedrockService {
   private readonly logger = new Logger(BedrockService.name);
@@ -45,9 +47,12 @@ export class BedrockService extends IBedrockService {
    * @param ocrText The text extracted from the document
    * @param requirementNames Allowed categories
    */
-  async classifyDocument(ocrText: string, requirementNames: string[]): Promise<ClassificationResult | null> {
+  async classifyDocument(
+    ocrText: string,
+    requirementNames: string[],
+  ): Promise<ClassificationResult | null> {
     this.logger.log('Classifying document using Bedrock');
-    
+
     const prompt = `You are an AI document classifier. Based on the following document text, classify it into exactly one of these categories: ${requirementNames.join(', ')}.
     If it does not match any, choose the closest one or return null if completely unrelated.
     
@@ -82,7 +87,7 @@ export class BedrockService extends IBedrockService {
    */
   async extractFields(ocrText: string, fieldNames: string[]): Promise<FieldExtractionResult[]> {
     this.logger.log('Extracting fields using Bedrock');
-    
+
     const prompt = `You are an AI data extractor. Extract the following fields from the document text: ${fieldNames.join(', ')}.
     If a field is not found in the text, its value should be null.
     
@@ -102,8 +107,14 @@ export class BedrockService extends IBedrockService {
 
     try {
       const responseJson = await this._invokeModel(prompt);
-      if (responseJson?.fields) {
-        return responseJson.fields;
+      if (responseJson?.fields && Array.isArray(responseJson.fields)) {
+        return responseJson.fields
+          .map((f: any) => ({
+            fieldName: String(f.fieldName || f.field || f.name || '').trim(),
+            value: f.value === undefined ? null : isNullOrUndefined(f),
+            confidence: typeof f.confidence === 'number' ? Number(f.confidence) : 0.85,
+          }))
+          .filter((f: { fieldName: string }) => f.fieldName.length > 0);
       }
       return [];
     } catch (error) {
@@ -119,37 +130,37 @@ export class BedrockService extends IBedrockService {
     // Note: The payload format depends on the specific model family (e.g. Claude vs Titan).
     // Assuming Anthropic Claude format for this implementation given its common use in this context.
     const payload = {
-      anthropic_version: "bedrock-2023-05-31",
+      anthropic_version: 'bedrock-2023-05-31',
       max_tokens: 1000,
       messages: [
         {
-          role: "user",
-          content: [{ type: "text", text: prompt }]
-        }
+          role: 'user',
+          content: [{ type: 'text', text: prompt }],
+        },
       ],
       temperature: 0,
     };
 
     const command = new InvokeModelCommand({
       modelId: this.modelId,
-      contentType: "application/json",
-      accept: "application/json",
+      contentType: 'application/json',
+      accept: 'application/json',
       body: JSON.stringify(payload),
     });
 
     const response = await this.bedrockClient.send(command);
     const responseBody = new TextDecoder().decode(response.body);
     const parsedBody = JSON.parse(responseBody);
-    
+
     // Extract JSON from Claude's response text
     const textContent = parsedBody.content?.[0]?.text || '';
-    
+
     // Sometimes LLMs wrap JSON in markdown blocks despite instructions
     const jsonMatch = textContent.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       return JSON.parse(jsonMatch[0]);
     }
-    
+
     return JSON.parse(textContent);
   }
 }

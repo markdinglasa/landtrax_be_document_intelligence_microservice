@@ -89,6 +89,14 @@ describe('OcrReconciliationService', () => {
       expect(result.scanned).toBe(1);
       expect(result.enqueuedBatch).toBe(1);
       expect(result.enqueuedSingle).toBe(0);
+      expect(mockDocumentRepo.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            isOCR: true,
+            ocrProcessed: false,
+          }),
+        }),
+      );
       expect(mockBatchQueue.add).toHaveBeenCalledTimes(1);
       expect(mockDocumentRepo.update).toHaveBeenCalledWith('doc-comp-1', {
         notes: expect.stringContaining('Reconciliation Attempt 1'),

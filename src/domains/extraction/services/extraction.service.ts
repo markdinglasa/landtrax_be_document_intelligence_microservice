@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, IsNull } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { BedrockService } from '../../../shared/infrastructure/aws/bedrock.service.js';
 import ExtractedFieldEntity from '../../../shared/infrastructure/database/entities/extracted-field.entity.js';
 import RequirementMappingEntity from '../../../shared/infrastructure/database/entities/requirement-mapping.entity.js';
@@ -37,8 +37,8 @@ export class ExtractionService extends IExtractionService {
         return [];
       }
 
-      const fieldNames = mappings.map(m => m.targetFieldName).filter(Boolean) as string[];
-      
+      const fieldNames = mappings.map((m) => m.targetFieldName).filter(Boolean);
+
       if (fieldNames.length === 0) {
         return [];
       }
@@ -60,12 +60,21 @@ export class ExtractionService extends IExtractionService {
     fields: { fieldName: string; value: string | null; confidence: number }[],
   ): Promise<ExtractedFieldEntity[]> {
     try {
-      const entitiesToSave = fields.map(field => {
+      const validFields = (fields || []).filter(
+        (field) =>
+          field && typeof field.fieldName === 'string' && field.fieldName.trim().length > 0,
+      );
+
+      if (validFields.length === 0) {
+        return [];
+      }
+
+      const entitiesToSave = validFields.map((field) => {
         const entity = this.extractedFieldRepo.create({
           documentId,
-          fieldName: field.fieldName,
-          fieldValue: field.value,
-          confidence: field.confidence,
+          fieldName: field.fieldName.trim(),
+          fieldValue: field.value === undefined ? null : field.value,
+          confidence: typeof field.confidence === 'number' ? field.confidence : null,
           isUserModified: false,
           extractedDate: new Date(),
         });
@@ -101,7 +110,7 @@ export class ExtractionService extends IExtractionService {
       const fields = await this.getFieldsByDocumentId(documentId);
       if (fields.length > 0) {
         const now = new Date();
-        fields.forEach(f => {
+        fields.forEach((f) => {
           f.deletedDate = now;
         });
         await this.extractedFieldRepo.save(fields);

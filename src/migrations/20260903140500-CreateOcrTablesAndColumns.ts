@@ -45,8 +45,8 @@ export class CreateOcrTablesAndColumns20260903140500 implements MigrationInterfa
         CREATE TABLE [dbo].[ExtractedFields] (
           [Id] NVARCHAR(36) NOT NULL CONSTRAINT [DF_ExtractedFields_Id] DEFAULT NEWID(),
           [DocumentId] NVARCHAR(36) NOT NULL,
-          [FieldName] NVARCHAR(255) NOT NULL,
-          [FieldValue] NVARCHAR(MAX) NULL,
+          [Field] NVARCHAR(255) NOT NULL,
+          [Value] NVARCHAR(MAX) NULL,
           [Confidence] DECIMAL(5, 2) NULL,
           [IsUserModified] BIT NOT NULL CONSTRAINT [DF_ExtractedFields_IsUserModified] DEFAULT 0,
           [ExtractedDate] DATETIMEOFFSET NULL,
@@ -57,7 +57,7 @@ export class CreateOcrTablesAndColumns20260903140500 implements MigrationInterfa
         );
 
         CREATE NONCLUSTERED INDEX [IX_ExtractedFields_DocumentId] ON [dbo].[ExtractedFields] ([DocumentId]);
-        CREATE NONCLUSTERED INDEX [IX_ExtractedFields_FieldName] ON [dbo].[ExtractedFields] ([FieldName]);
+        CREATE NONCLUSTERED INDEX [IX_ExtractedFields_Field] ON [dbo].[ExtractedFields] ([Field]);
       END
       ELSE
       BEGIN
@@ -70,14 +70,14 @@ export class CreateOcrTablesAndColumns20260903140500 implements MigrationInterfa
           ALTER TABLE [dbo].[ExtractedFields] ADD CONSTRAINT [DF_ExtractedFields_Id] DEFAULT NEWID() FOR [Id];
         END
 
-        IF NOT EXISTS (SELECT * FROM sys.columns WHERE Name = N'FieldName' AND Object_ID = Object_ID(N'[dbo].[ExtractedFields]'))
+        IF NOT EXISTS (SELECT * FROM sys.columns WHERE Name = N'Field' AND Object_ID = Object_ID(N'[dbo].[ExtractedFields]'))
         BEGIN
-          ALTER TABLE [dbo].[ExtractedFields] ADD [FieldName] NVARCHAR(255) NULL;
+          ALTER TABLE [dbo].[ExtractedFields] ADD [Field] NVARCHAR(255) NULL;
         END
 
-        IF NOT EXISTS (SELECT * FROM sys.columns WHERE Name = N'FieldValue' AND Object_ID = Object_ID(N'[dbo].[ExtractedFields]'))
+        IF NOT EXISTS (SELECT * FROM sys.columns WHERE Name = N'Value' AND Object_ID = Object_ID(N'[dbo].[ExtractedFields]'))
         BEGIN
-          ALTER TABLE [dbo].[ExtractedFields] ADD [FieldValue] NVARCHAR(MAX) NULL;
+          ALTER TABLE [dbo].[ExtractedFields] ADD [Value] NVARCHAR(MAX) NULL;
         END
 
         IF NOT EXISTS (SELECT * FROM sys.columns WHERE Name = N'IsUserModified' AND Object_ID = Object_ID(N'[dbo].[ExtractedFields]'))

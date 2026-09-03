@@ -70,9 +70,10 @@ export class OcrReconciliationService {
   ): Promise<ReconciliationResult> {
     const thresholdDate = new Date(Date.now() - stuckThresholdMinutes * 60 * 1000);
 
-    // Find up to `batchSize` stuck documents older than `thresholdDate`
+    // Find up to `batchSize` stuck OCR documents (only where isOCR === true) older than `thresholdDate`
     const stuckDocuments = await this.documentRepo.find({
       where: {
+        isOCR: true,
         ocrProcessed: false,
         deletedDate: IsNull(),
         createdDate: LessThan(thresholdDate),
@@ -97,7 +98,7 @@ export class OcrReconciliationService {
     for (const doc of stuckDocuments) {
       // Check retry guard to prevent infinite loops (max 3 retries)
       const currentNotes = doc.notes || '';
-      const retryMatch = RegExp(/Reconciliation Attempt (\d+)/).exec(currentNotes);
+      const retryMatch = new RegExp(/Reconciliation Attempt (\d+)/).exec(currentNotes);
       const attemptCount = retryMatch ? Number.parseInt(retryMatch[1], 10) : 0;
 
       if (attemptCount >= 3) {

@@ -96,6 +96,7 @@ export class BatchUploadProcessor extends WorkerHost {
           transactionServiceId: transactionServiceId || null,
           requirementId: groupInfo.requirementId,
           type: 'application/pdf',
+          isOCR: true,
           ocrProcessed: false,
           ocrText: '',
           ocrConfidence: 0,

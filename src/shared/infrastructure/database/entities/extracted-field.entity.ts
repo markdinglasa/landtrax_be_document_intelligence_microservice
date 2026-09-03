@@ -1,4 +1,5 @@
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { BeforeInsert, Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { randomUUID } from 'node:crypto';
 import { ENTITY } from '../models/general-model.js';
 import DocumentEntity from './document.entity.js';
 import { LineEntity } from './general.entity.js';
@@ -16,10 +17,10 @@ export default class ExtractedFieldEntity extends LineEntity {
   @Column({ name: 'DocumentId', type: 'uniqueidentifier', nullable: false })
   documentId!: string;
 
-  @Column({ name: 'FieldName', type: 'varchar', length: 255, nullable: false })
+  @Column({ name: 'Field', type: 'varchar', length: 255, nullable: false })
   fieldName!: string;
 
-  @Column({ name: 'FieldValue', type: 'text', nullable: true })
+  @Column({ name: 'Value', type: 'text', nullable: true })
   fieldValue!: string | null;
 
   @Column({ name: 'Confidence', type: 'decimal', precision: 5, scale: 2, nullable: true })
@@ -30,6 +31,13 @@ export default class ExtractedFieldEntity extends LineEntity {
 
   @Column({ name: 'ExtractedDate', type: 'datetimeoffset', nullable: true })
   extractedDate!: Date | null;
+
+  @BeforeInsert()
+  generateId() {
+    if (!this.id) {
+      this.id = randomUUID().toUpperCase();
+    }
+  }
 
   // Relationships
   @ManyToOne(() => DocumentEntity, {

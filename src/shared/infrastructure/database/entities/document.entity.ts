@@ -44,6 +44,9 @@ export default class DocumentEntity extends LineEntity {
   @Column({ name: 'Version', type: 'int', nullable: true, default: 1, select: false })
   version?: number;
 
+  @Column({ name: 'IsOCR', type: 'bit', nullable: false, default: false })
+  isOCR!: boolean;
+
   @Column({ name: 'OCRProcessed', type: 'bit', nullable: false })
   ocrProcessed!: boolean;
 
