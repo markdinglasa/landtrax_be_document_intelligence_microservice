@@ -16,9 +16,10 @@ export abstract class IValidationService {
     serviceId?: string | null,
   ): Promise<{ isDuplicate: boolean; message?: string }>;
 
-  /** Pre-checks for unreadable conditions (blank buffer, encrypted PDF). */
+  /** Pre-checks for unreadable conditions (blank buffer, encrypted PDF, unsupported format). */
   abstract detectUnreadableConditions(
     fileBuffer: Buffer,
     fileName: string,
+    fileType?: string,
   ): { isReadable: boolean; failureReason?: string };
 }

@@ -18,14 +18,26 @@ export class BedrockService extends IBedrockService {
 
   constructor(private readonly configService: ConfigService) {
     super();
-    this.bedrockClient = new BedrockRuntimeClient({
-      region: this.configService.get<string>('aws.region'),
-      credentials: {
-        accessKeyId: this.configService.get<string>('aws.accessKeyId')!,
-        secretAccessKey: this.configService.get<string>('aws.secretAccessKey')!,
-      },
-    });
-    this.modelId = this.configService.get<string>('aws.bedrock.modelId')!;
+
+    const region = this.configService.get<string>('aws.region') || 'ap-southeast-1';
+    const accessKeyId = this.configService.get<string>('aws.accessKeyId');
+    const secretAccessKey = this.configService.get<string>('aws.secretAccessKey');
+
+    const clientConfig: any = {
+      region,
+    };
+
+    if (accessKeyId && secretAccessKey) {
+      clientConfig.credentials = {
+        accessKeyId: accessKeyId.trim(),
+        secretAccessKey: secretAccessKey.trim(),
+      };
+    }
+
+    this.bedrockClient = new BedrockRuntimeClient(clientConfig);
+    this.modelId =
+      this.configService.get<string>('aws.bedrock.modelId') ||
+      'anthropic.claude-3-sonnet-20240229-v1:0';
   }
 
   /**
@@ -50,7 +62,7 @@ export class BedrockService extends IBedrockService {
 
     try {
       const responseJson = await this._invokeModel(prompt);
-      if (responseJson && responseJson.requirementName) {
+      if (responseJson?.requirementName) {
         return {
           requirementName: responseJson.requirementName,
           confidence: responseJson.confidence || 0,
@@ -90,7 +102,7 @@ export class BedrockService extends IBedrockService {
 
     try {
       const responseJson = await this._invokeModel(prompt);
-      if (responseJson && responseJson.fields) {
+      if (responseJson?.fields) {
         return responseJson.fields;
       }
       return [];

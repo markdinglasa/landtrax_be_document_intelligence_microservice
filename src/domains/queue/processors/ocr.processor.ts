@@ -3,10 +3,11 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Job } from 'bullmq';
+import { randomUUID } from 'node:crypto';
 import { Repository } from 'typeorm';
 import {
-  OCR_PROCESSING_QUEUE,
   OCR_MODULE_NAME,
+  OCR_PROCESSING_QUEUE,
   OCRAuditAction,
   OCRFailureReason,
   OCRHistoryStatus,
@@ -23,7 +24,6 @@ import { ClassificationService } from '../../classification/services/classificat
 import { ExtractionService } from '../../extraction/services/extraction.service.js';
 import { ValidationService } from '../../validation/services/validation.service.js';
 import { OcrJobData } from '../ocr-queue.constants.js';
-
 @Processor(OCR_PROCESSING_QUEUE)
 export class OcrProcessor extends WorkerHost {
   private readonly logger = new Logger(OcrProcessor.name);
@@ -72,13 +72,27 @@ export class OcrProcessor extends WorkerHost {
       // 1. Download file from S3
       const fileBuffer = await this.s3Service.downloadFile(s3Key);
 
-      // 2. Pre-check for unreadable conditions (Blank, password-protected, etc.)
-      const unreadableCheck = this.validationService.detectUnreadableConditions(fileBuffer, fileName);
+      // 2. Pre-check for unreadable conditions (Blank, password-protected, unsupported format, etc.)
+      const unreadableCheck = this.validationService.detectUnreadableConditions(
+        fileBuffer,
+        fileName,
+        job.data.fileType,
+      );
       if (!unreadableCheck.isReadable) {
-        const failureReason = unreadableCheck.failureReason || OCRFailureReason.TEXT_EXTRACTION_FAILED;
+        const failureReason =
+          unreadableCheck.failureReason || OCRFailureReason.UNSUPPORTED_CONTENT;
         this.logger.warn(`Document ${documentId} is unreadable: ${failureReason}`);
 
-        await this.handleUnreadableDocument(documentId, userId, transactionId, requirementName, fileName, failureReason, serviceId, activeRequirementId);
+        await this.handleUnreadableDocument(
+          documentId,
+          userId,
+          transactionId,
+          requirementName,
+          fileName,
+          failureReason,
+          serviceId,
+          activeRequirementId,
+        );
         return {
           success: false,
           status: OCRStatus.NOT_READABLE,
@@ -89,19 +103,59 @@ export class OcrProcessor extends WorkerHost {
       // 3. Perform OCR via Textract
       let ocrResult;
       const isPdf = fileName.toLowerCase().endsWith('.pdf');
-      if (isPdf) {
-        try {
-          ocrResult = await this.textractService.extractTextFromS3(s3Key);
-        } catch {
+      try {
+        if (isPdf) {
+          try {
+            ocrResult = await this.textractService.extractTextFromS3(s3Key);
+          } catch {
+            ocrResult = await this.textractService.extractText(fileBuffer);
+          }
+        } else {
           ocrResult = await this.textractService.extractText(fileBuffer);
         }
-      } else {
-        ocrResult = await this.textractService.extractText(fileBuffer);
+      } catch (ocrError: any) {
+        if (
+          ocrError.name === 'UnsupportedDocumentException' ||
+          ocrError.__type === 'UnsupportedDocumentException' ||
+          ocrError.message?.includes('unsupported document format') ||
+          ocrError.name === 'BadDocumentException' ||
+          ocrError.name === 'InvalidParameterException'
+        ) {
+          const failureReason = OCRFailureReason.UNSUPPORTED_CONTENT;
+          this.logger.warn(
+            `Textract reported unsupported document format for document ${documentId}: ${ocrError.message}`,
+          );
+          await this.handleUnreadableDocument(
+            documentId,
+            userId,
+            transactionId,
+            requirementName,
+            fileName,
+            failureReason,
+            serviceId,
+            activeRequirementId,
+          );
+          return {
+            success: false,
+            status: OCRStatus.NOT_READABLE,
+            failureReason,
+          };
+        }
+        throw ocrError;
       }
 
       if (!ocrResult || !ocrResult.text || ocrResult.text.trim().length === 0) {
         const failureReason = OCRFailureReason.TEXT_EXTRACTION_FAILED;
-        await this.handleUnreadableDocument(documentId, userId, transactionId, requirementName, fileName, failureReason, serviceId, activeRequirementId);
+        await this.handleUnreadableDocument(
+          documentId,
+          userId,
+          transactionId,
+          requirementName,
+          fileName,
+          failureReason,
+          serviceId,
+          activeRequirementId,
+        );
         return {
           success: false,
           status: OCRStatus.NOT_READABLE,
@@ -111,7 +165,10 @@ export class OcrProcessor extends WorkerHost {
 
       // 4. Document Classification (if not already classified)
       if (!activeRequirementId && serviceId) {
-        const classification = await this.classificationService.classifyDocument(ocrResult.text, serviceId);
+        const classification = await this.classificationService.classifyDocument(
+          ocrResult.text,
+          serviceId,
+        );
         if (classification) {
           activeRequirementId = classification.requirementId;
           requirementName = classification.requirementName;
@@ -124,7 +181,11 @@ export class OcrProcessor extends WorkerHost {
       // 5. Field Extraction
       let extractedFields: { fieldName: string; value: string | null; confidence: number }[] = [];
       if (activeRequirementId && serviceId) {
-        extractedFields = await this.extractionService.extractFields(ocrResult.text, activeRequirementId, serviceId);
+        extractedFields = await this.extractionService.extractFields(
+          ocrResult.text,
+          activeRequirementId,
+          serviceId,
+        );
         await this.extractionService.saveExtractedFields(documentId, extractedFields);
       }
 
@@ -140,11 +201,17 @@ export class OcrProcessor extends WorkerHost {
       // 7. Log to OCRRequestHistory
       await this.ocrHistoryRepo.save(
         this.ocrHistoryRepo.create({
+          id: randomUUID().toUpperCase(),
           documentId,
           userId,
           status: OCRHistoryStatus.SUCCESS,
           response: JSON.stringify(extractedFields),
-          payload: JSON.stringify({ fileName, s3Key, serviceId, requirementId: activeRequirementId }),
+          payload: JSON.stringify({
+            fileName,
+            s3Key,
+            serviceId,
+            requirementId: activeRequirementId,
+          }),
           errorMessage: null,
           timestamp: new Date(),
         }),
@@ -172,7 +239,10 @@ export class OcrProcessor extends WorkerHost {
         extractedCount: extractedFields.length,
       };
     } catch (error: any) {
-      this.logger.error(`Error processing OCR for documentId=${documentId}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error processing OCR for documentId=${documentId}: ${error.message}`,
+        error.stack,
+      );
 
       // Persist failure info on document
       await this.documentRepo.update(documentId, {
@@ -244,6 +314,7 @@ export class OcrProcessor extends WorkerHost {
     // 3. Log to OCRRequestHistory
     await this.ocrHistoryRepo.save(
       this.ocrHistoryRepo.create({
+        id: randomUUID().toUpperCase(),
         documentId,
         userId,
         status: OCRHistoryStatus.NOT_READABLE,

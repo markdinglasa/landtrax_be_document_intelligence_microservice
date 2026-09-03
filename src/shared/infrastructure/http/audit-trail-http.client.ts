@@ -1,6 +1,6 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
-import { AuditTrailService } from '../../contracts/audit-trail.service.abstract';
+import { AuditTrailService } from '../../contracts/audit-trail.service.abstract.js';
 
 /**
  * Calls the monolith's internal audit-trail endpoint.
@@ -8,14 +8,14 @@ import { AuditTrailService } from '../../contracts/audit-trail.service.abstract'
  */
 @Injectable()
 export class AuditTrailHttpClient extends AuditTrailService {
-
-  getUserAuditTrail(userId: string, ...args: any[]): Promise<any> {
-    throw new Error('Method not implemented.');
-  }
   private readonly _logger = new Logger(AuditTrailHttpClient.name);
 
   constructor(private readonly httpService: HttpService) {
     super();
+  }
+
+  getUserAuditTrail(userId: string, ...args: any[]): Promise<any> {
+    throw new Error('Method not implemented.');
   }
 
   async create(dto: {
@@ -26,10 +26,18 @@ export class AuditTrailHttpClient extends AuditTrailService {
     result?: string;
     ip?: string;
   }): Promise<any> {
-    const url = `${process.env.MONOLITH_BASE_URL}/internal/audit-trail`;
+    const baseUrl = process.env.MONOLITH_BASE_URL;
+    if (!baseUrl || baseUrl === 'undefined' || baseUrl.trim() === '') {
+      this._logger.debug(
+        `[AuditTrailHttpClient] MONOLITH_BASE_URL is not configured. Audit trail skipped for action=${dto.action}`,
+      );
+      return { success: true, skipped: true };
+    }
+
+    const url = `${baseUrl.replace(/\/+$/, '')}/internal/audit-trail`;
     this.httpService
       .post(url, dto, {
-        headers: { 'x-internal-secret': process.env.APP_AUTH },
+        headers: { 'x-internal-secret': process.env.APP_AUTH || '' },
       })
       .subscribe({
         error: (e) =>

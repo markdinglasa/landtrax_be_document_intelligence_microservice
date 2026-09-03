@@ -1,4 +1,12 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BeforeInsert,
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { randomUUID } from 'node:crypto';
 import { ENTITY } from '../models/general-model.js';
 import DocumentEntity from './document.entity.js';
 import UserEntity from './user.entity.js';
@@ -13,10 +21,10 @@ export default class OCRRequestHistoryEntity {
   @PrimaryGeneratedColumn('uuid', { name: 'Id' })
   id!: string;
 
-  @Column({ name: 'DocumentId', type: 'uniqueidentifier', nullable: false })
+  @Column({ name: 'DocumentId', type: 'varchar', nullable: false })
   documentId!: string;
 
-  @Column({ name: 'UserId', type: 'uniqueidentifier', nullable: false })
+  @Column({ name: 'UserId', type: 'varchar', nullable: false })
   userId!: string;
 
   @Column({ name: 'Response', type: 'text', nullable: true })
@@ -33,6 +41,13 @@ export default class OCRRequestHistoryEntity {
 
   @Column({ name: 'Timestamp', type: 'datetimeoffset', nullable: false })
   timestamp!: Date;
+
+  @BeforeInsert()
+  generateId() {
+    if (!this.id) {
+      this.id = randomUUID().toUpperCase();
+    }
+  }
 
   // Relationships
   @ManyToOne(() => DocumentEntity, {

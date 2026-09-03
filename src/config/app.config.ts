@@ -55,7 +55,7 @@ export const getTypeOrmConfig = (configService: ConfigService): any => {
     // Enable migrations
     migrations: [__dirname + '/../migrations/*{.ts,.js}'],
     migrationsTableName: 'migrations',
-    migrationsRun: false,
+    migrationsRun: true,
     retryAttempts: 10,
     retryDelay: 3000,
     extra: {

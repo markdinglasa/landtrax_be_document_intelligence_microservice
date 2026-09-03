@@ -189,6 +189,35 @@ describe('OcrProcessor', () => {
       }));
     });
 
+    it('should handle UnsupportedDocumentException as NOT_READABLE with UNSUPPORTED_CONTENT (AC 3)', async () => {
+      const unsupportedError = new Error('Request has unsupported document format');
+      unsupportedError.name = 'UnsupportedDocumentException';
+      mockTextractService.extractText.mockRejectedValueOnce(unsupportedError);
+
+      const mockJob = {
+        data: {
+          documentId: 'doc-zip',
+          transactionId: 'tx-100',
+          serviceId: 'srv-1',
+          userId: 'user-1',
+          s3Key: 'docs/dashboard.zip',
+          fileName: 'dashboard.zip',
+          requirementId: 'req-title',
+        },
+      } as unknown as Job;
+
+      const result = await processor.process(mockJob);
+
+      expect(result.success).toBe(false);
+      expect(result.status).toBe(OCRStatus.NOT_READABLE);
+      expect(result.failureReason).toBe(OCRFailureReason.UNSUPPORTED_CONTENT);
+
+      expect(mockDocRepo.update).toHaveBeenCalledWith('doc-zip', expect.objectContaining({
+        ocrProcessed: true,
+        ocrProcessFailedReason: OCRFailureReason.UNSUPPORTED_CONTENT,
+      }));
+    });
+
     it('should catch unexpected errors, persist error status on document, and re-throw (AC 27, 28)', async () => {
       mockTextractService.extractTextFromS3.mockRejectedValueOnce(new Error('Textract service down'));
       mockTextractService.extractText.mockRejectedValueOnce(new Error('Textract service down'));

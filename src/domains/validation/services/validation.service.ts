@@ -163,19 +163,40 @@ export class ValidationService extends IValidationService {
     }
   }
 
+  /** Supported extensions for OCR extraction */
+  private static readonly SUPPORTED_EXTENSIONS = new Set([
+    'pdf',
+    'png',
+    'jpg',
+    'jpeg',
+    'tiff',
+    'tif',
+  ]);
+
   /**
-   * Pre-checks for unreadable conditions.
+   * Pre-checks for unreadable conditions (blank buffer, unsupported format, encrypted PDF).
    */
   detectUnreadableConditions(
     fileBuffer: Buffer,
     fileName: string,
+    fileType?: string,
   ): { isReadable: boolean; failureReason?: string } {
     try {
       if (!fileBuffer || fileBuffer.length === 0) {
         return { isReadable: false, failureReason: OCRFailureReason.BLANK_DOCUMENT };
       }
 
-      const ext = fileName.split('.').pop()?.toLowerCase();
+      const ext = fileName.split('.').pop()?.toLowerCase() || '';
+
+      // Check if file format is supported by OCR engines (Textract / Image readers)
+      if (ext && !ValidationService.SUPPORTED_EXTENSIONS.has(ext)) {
+        return { isReadable: false, failureReason: OCRFailureReason.UNSUPPORTED_CONTENT };
+      }
+
+      if (fileType && !fileType.includes('pdf') && !fileType.includes('image') && !fileType.includes('octet-stream')) {
+        return { isReadable: false, failureReason: OCRFailureReason.UNSUPPORTED_CONTENT };
+      }
+
       if (ext === 'pdf') {
         const checkLength = Math.min(fileBuffer.length, 4096);
         const headerSlice = fileBuffer.toString('utf8', 0, checkLength);

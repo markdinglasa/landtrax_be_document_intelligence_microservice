@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   TextractClient,
+  TextractClientConfig,
   DetectDocumentTextCommand,
   StartDocumentTextDetectionCommand,
   GetDocumentTextDetectionCommand,
@@ -15,6 +16,7 @@ import {
   ExtractedBlock,
   ExtractionResult,
 } from './textract.service.abstract.js';
+import { normalizeS3Key } from './s3.service.js';
 
 export type { ExtractedBlock, ExtractionResult };
 
@@ -26,14 +28,27 @@ export class TextractService extends ITextractService {
 
   constructor(private readonly configService: ConfigService) {
     super();
-    this.textractClient = new TextractClient({
-      region: this.configService.get<string>('aws.region'),
-      credentials: {
-        accessKeyId: this.configService.get<string>('aws.accessKeyId')!,
-        secretAccessKey: this.configService.get<string>('aws.secretAccessKey')!,
-      },
-    });
-    this.s3BucketName = this.configService.get<string>('aws.s3.bucketName')!;
+
+    const region = this.configService.get<string>('aws.region') || 'ap-southeast-1';
+    const accessKeyId = this.configService.get<string>('aws.accessKeyId');
+    const secretAccessKey = this.configService.get<string>('aws.secretAccessKey');
+
+    const clientConfig: TextractClientConfig = {
+      region,
+    };
+
+    if (accessKeyId && secretAccessKey) {
+      clientConfig.credentials = {
+        accessKeyId: accessKeyId.trim(),
+        secretAccessKey: secretAccessKey.trim(),
+      };
+    }
+
+    this.textractClient = new TextractClient(clientConfig);
+    this.s3BucketName =
+      this.configService.get<string>('aws.s3.bucketName') ||
+      process.env.AWS_S3_BUCKET ||
+      'landtrax';
   }
 
   /**
@@ -58,17 +73,18 @@ export class TextractService extends ITextractService {
 
   /**
    * Extract text from a multi-page PDF stored in S3.
-   * @param s3Key The S3 object key
+   * @param s3Key The S3 object key or S3 URL
    * @returns Extracted text, overall confidence, and blocks grouped by page
    */
   async extractTextFromS3(s3Key: string): Promise<ExtractionResult> {
-    this.logger.log(`Starting text extraction for S3 key: ${s3Key}`);
+    const cleanKey = normalizeS3Key(s3Key, this.s3BucketName);
+    this.logger.log(`Starting text extraction for S3 key: ${cleanKey}`);
     try {
       const startCommand = new StartDocumentTextDetectionCommand({
         DocumentLocation: {
           S3Object: {
             Bucket: this.s3BucketName,
-            Name: s3Key,
+            Name: cleanKey,
           },
         },
       });
@@ -100,74 +116,96 @@ export class TextractService extends ITextractService {
 
       return this._mapBlocksToExtractionResult(allBlocks);
     } catch (error) {
-      this.logger.error(`Error extracting text from S3 key: ${s3Key}`, error);
+      this.logger.error(`Error extracting text from S3 key: ${cleanKey}`, error);
       throw error;
     }
   }
 
   /**
-   * Analyze document for forms and tables from a buffer.
-   * @param fileBuffer Buffer containing the image
-   * @returns Raw Textract response blocks
+   * Extract structured forms and tables from a document using Textract AnalyzeDocument.
+   * @param fileBuffer Buffer containing the document (PDF page or Image)
+   * @returns Raw extracted blocks for key-value extraction
    */
-  async analyzeDocument(fileBuffer: Buffer): Promise<Block[]> {
-    this.logger.log('Analyzing document from buffer for forms and tables');
+  async extractFormsAndTables(fileBuffer: Buffer): Promise<Block[]> {
+    this.logger.log('Extracting forms and tables via AnalyzeDocument');
     try {
       const command = new AnalyzeDocumentCommand({
         Document: { Bytes: fileBuffer },
         FeatureTypes: [FeatureType.FORMS, FeatureType.TABLES],
       });
+
       const response = await this.textractClient.send(command);
       return response.Blocks || [];
     } catch (error) {
-      this.logger.error('Error analyzing document', error);
+      this.logger.error('Error analyzing forms and tables', error);
       throw error;
     }
   }
 
   /**
-   * Polls the Textract job status until SUCCEEDED or FAILED.
-   * @param jobId The job ID to poll
+   * Alias implementing ITextractService.analyzeDocument.
    */
-  private async _waitForTextDetection(jobId: string): Promise<void> {
-    let status = 'IN_PROGRESS';
-    while (status === 'IN_PROGRESS') {
-      await new Promise(resolve => setTimeout(resolve, 5000));
-      const getCommand = new GetDocumentTextDetectionCommand({ JobId: jobId });
-      const getResponse = await this.textractClient.send(getCommand);
-      status = getResponse.JobStatus || 'FAILED';
-
-      if (status === 'FAILED') {
-        throw new Error('Textract job failed');
-      }
-    }
+  async analyzeDocument(fileBuffer: Buffer): Promise<Block[]> {
+    return this.extractFormsAndTables(fileBuffer);
   }
 
   /**
-   * Helper to map raw Blocks to ExtractionResult
+   * Poll Textract until asynchronous text detection job finishes.
+   */
+  private async _waitForTextDetection(jobId: string, maxAttempts = 60, intervalMs = 2000): Promise<void> {
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      const command = new GetDocumentTextDetectionCommand({ JobId: jobId });
+      const response = await this.textractClient.send(command);
+
+      const status = response.JobStatus;
+      if (status === 'SUCCEEDED') {
+        return;
+      }
+
+      if (status === 'FAILED') {
+        throw new Error(`Textract job ${jobId} failed: ${response.StatusMessage}`);
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    }
+
+    throw new Error(`Textract job ${jobId} timed out after ${maxAttempts * (intervalMs / 1000)}s`);
+  }
+
+  /**
+   * Helper to process Textract blocks into a structured ExtractionResult.
    */
   private _mapBlocksToExtractionResult(blocks: Block[]): ExtractionResult {
+    const extractedBlocks: ExtractedBlock[] = [];
     let fullText = '';
     let totalConfidence = 0;
-    let blockCount = 0;
-    const extractedBlocks: ExtractedBlock[] = [];
+    let lineCount = 0;
 
     for (const block of blocks) {
       if (block.BlockType === 'LINE' && block.Text) {
         fullText += (fullText ? '\n' : '') + block.Text;
         totalConfidence += block.Confidence || 0;
-        blockCount++;
+        lineCount++;
+
         extractedBlocks.push({
           text: block.Text,
           confidence: block.Confidence || 0,
           pageNumber: block.Page || 1,
+          geometry: block.Geometry
+            ? {
+                boundingBox: block.Geometry.BoundingBox,
+                polygon: block.Geometry.Polygon,
+              }
+            : undefined,
         });
       }
     }
 
+    const overallConfidence = lineCount > 0 ? totalConfidence / lineCount : 0;
+
     return {
       text: fullText,
-      confidence: blockCount > 0 ? totalConfidence / blockCount : 0,
+      confidence: overallConfidence,
       blocks: extractedBlocks,
     };
   }

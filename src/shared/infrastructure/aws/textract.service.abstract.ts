@@ -4,6 +4,7 @@ export interface ExtractedBlock {
   text: string;
   confidence: number;
   pageNumber: number;
+  geometry?: any;
 }
 
 export interface ExtractionResult {

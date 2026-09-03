@@ -1,7 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
-import UserEntity from '../database/entities/user.entity';
-import { EmailService } from '../../contracts/email.service.abstract';
+import UserEntity from '../database/entities/user.entity.js';
+import { EmailService } from '../../contracts/email.service.abstract.js';
 
 /**
  * Calls the monolith's internal email endpoint.
@@ -21,12 +21,20 @@ export class EmailHttpClient extends EmailService {
     downloadUrl: string,
     recordCount: number,
   ): Promise<void> {
-    const url = `${process.env.MONOLITH_BASE_URL}/internal/notify/audit-export-ready`;
+    const baseUrl = process.env.MONOLITH_BASE_URL;
+    if (!baseUrl || baseUrl === 'undefined' || baseUrl.trim() === '') {
+      this._logger.debug(
+        `[EmailHttpClient] MONOLITH_BASE_URL is not configured. Skipping email for user=${user.id}`,
+      );
+      return;
+    }
+
+    const url = `${baseUrl.replace(/\/+$/, '')}/internal/notify/audit-export-ready`;
     this.httpService
       .post(
         url,
         { userId: user.id, downloadUrl, recordCount },
-        { headers: { 'x-internal-secret': process.env.APP_AUTH } },
+        { headers: { 'x-internal-secret': process.env.APP_AUTH || '' } },
       )
       .subscribe({
         error: (e) =>

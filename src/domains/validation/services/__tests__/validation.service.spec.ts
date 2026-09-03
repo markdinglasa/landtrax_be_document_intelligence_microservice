@@ -158,6 +158,26 @@ describe('ValidationService', () => {
       expect(result.failureReason).toBe(OCRFailureReason.PASSWORD_PROTECTED);
     });
 
+    it('should detect unsupported file formats like .zip, .rar, .docx as UNSUPPORTED_CONTENT (AC 3)', () => {
+      const zipBuffer = Buffer.from('PK\x03\x04 fake zip content');
+      const zipResult = service.detectUnreadableConditions(zipBuffer, 'archive.zip');
+
+      expect(zipResult.isReadable).toBe(false);
+      expect(zipResult.failureReason).toBe(OCRFailureReason.UNSUPPORTED_CONTENT);
+
+      const docxResult = service.detectUnreadableConditions(zipBuffer, 'document.docx');
+      expect(docxResult.isReadable).toBe(false);
+      expect(docxResult.failureReason).toBe(OCRFailureReason.UNSUPPORTED_CONTENT);
+    });
+
+    it('should pass normal image buffer as readable', () => {
+      const imgBuffer = Buffer.from('fake png image data');
+      const result = service.detectUnreadableConditions(imgBuffer, 'receipt.png');
+
+      expect(result.isReadable).toBe(true);
+      expect(result.failureReason).toBeUndefined();
+    });
+
     it('should pass normal PDF buffer as readable', () => {
       const normalPdfBuffer = Buffer.from('%PDF-1.4 ... normal text content ...');
       const result = service.detectUnreadableConditions(normalPdfBuffer, 'normal.pdf');

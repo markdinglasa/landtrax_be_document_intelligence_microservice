@@ -1,13 +1,37 @@
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
-import { S3Service } from '../s3.service.js';
+import { S3Service, normalizeS3Key } from '../s3.service.js';
 
 // Mock @aws-sdk/client-s3 and @aws-sdk/s3-request-presigner
 jest.mock('@aws-sdk/client-s3');
 jest.mock('@aws-sdk/s3-request-presigner', () => ({
   getSignedUrl: jest.fn().mockResolvedValue('https://s3.amazonaws.com/test-signed-url'),
 }));
+
+describe('normalizeS3Key', () => {
+  it('should return empty string for empty input', () => {
+    expect(normalizeS3Key('')).toBe('');
+  });
+
+  it('should return relative key untouched', () => {
+    expect(normalizeS3Key('transactions/123/file.pdf')).toBe('transactions/123/file.pdf');
+  });
+
+  it('should strip leading slash from relative key', () => {
+    expect(normalizeS3Key('/transactions/123/file.pdf')).toBe('transactions/123/file.pdf');
+  });
+
+  it('should normalize full virtual-hosted S3 URL', () => {
+    const url = 'https://landtrax.s3.ap-southeast-1.amazonaws.com/transactions/123/file.pdf';
+    expect(normalizeS3Key(url, 'landtrax')).toBe('transactions/123/file.pdf');
+  });
+
+  it('should normalize path-style S3 URL with bucket prefix', () => {
+    const url = 'https://s3.ap-southeast-1.amazonaws.com/landtrax/transactions/123/file.pdf';
+    expect(normalizeS3Key(url, 'landtrax')).toBe('transactions/123/file.pdf');
+  });
+});
 
 describe('S3Service', () => {
   let service: S3Service;
@@ -82,6 +106,32 @@ describe('S3Service', () => {
 
       expect(buffer).toBeInstanceOf(Buffer);
       expect(buffer.toString('utf8')).toBe('hello world');
+      expect(mockS3ClientSend).toHaveBeenCalledWith(expect.any(GetObjectCommand));
+    });
+
+    it('should normalize full URL when downloading from S3', async () => {
+      const chunk1 = new Uint8Array(Buffer.from('url content'));
+
+      const asyncIterable = {
+        async *[Symbol.asyncIterator]() {
+          yield chunk1;
+        },
+      };
+
+      mockS3ClientSend.mockResolvedValueOnce({
+        Body: asyncIterable,
+      });
+
+      const fullUrl = 'https://test-bucket.s3.ap-southeast-1.amazonaws.com/test/path/file.pdf';
+      const buffer = await service.downloadFile(fullUrl);
+
+      expect(buffer).toBeInstanceOf(Buffer);
+      expect(buffer.toString('utf8')).toBe('url content');
+      expect(GetObjectCommand).toHaveBeenCalledWith(
+        expect.objectContaining({
+          Key: 'test/path/file.pdf',
+        }),
+      );
       expect(mockS3ClientSend).toHaveBeenCalledWith(expect.any(GetObjectCommand));
     });
 

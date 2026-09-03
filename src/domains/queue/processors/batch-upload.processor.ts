@@ -30,8 +30,10 @@ export class BatchUploadProcessor extends WorkerHost {
   }
 
   async process(job: Job<BatchUploadJobData>): Promise<any> {
-    const { transactionId, serviceId, userId, s3Key, fileName } = job.data;
-    this.logger.log(`Processing composite batch upload for transactionId=${transactionId}, file=${fileName}`);
+    const { transactionId, transactionServiceId, serviceId, userId, s3Key, fileName } = job.data;
+    this.logger.log(
+      `Processing composite batch upload for transactionId=${transactionId}, transactionServiceId=${transactionServiceId}, file=${fileName}`,
+    );
 
     try {
       // 1. Download composite PDF from S3
@@ -64,9 +66,9 @@ export class BatchUploadProcessor extends WorkerHost {
       );
 
       // Convert 1-based page numbers to 0-based for pdf-lib
-      const splitGroups = groups.map(g => ({
+      const splitGroups = groups.map((g) => ({
         label: g.requirementName,
-        pages: g.pages.map(p => p - 1),
+        pages: g.pages.map((p) => p - 1),
         requirementId: g.requirementId,
       }));
 
@@ -91,6 +93,7 @@ export class BatchUploadProcessor extends WorkerHost {
           fileSize: split.buffer.length,
           originalFileName: `${split.label}.pdf`,
           transactionId,
+          transactionServiceId: transactionServiceId || null,
           requirementId: groupInfo.requirementId,
           type: 'application/pdf',
           ocrProcessed: false,
@@ -107,6 +110,7 @@ export class BatchUploadProcessor extends WorkerHost {
         await this.ocrProcessingQueue.add(`ocr-job-${savedDoc.id}`, {
           documentId: savedDoc.id,
           transactionId,
+          transactionServiceId: transactionServiceId || null,
           serviceId,
           userId,
           s3Key: splitKey,
@@ -128,6 +132,24 @@ export class BatchUploadProcessor extends WorkerHost {
       };
     } catch (error: any) {
       this.logger.error(`Error processing batch upload: ${error.message}`, error.stack);
+
+      // Graceful error recovery: mark parent document as failed with reason so UI displays error and doesn't spin forever
+      if (job.data.documentId) {
+        try {
+          await this.documentRepo.update(job.data.documentId, {
+            ocrProcessed: true,
+            ocrProcessFailedReason: `Composite OCR processing failed: ${error.message}`,
+            notes: 'OCR - Failed',
+            ocrProcessedDate: new Date(),
+          });
+          this.logger.log(`Updated DocumentEntity ID: ${job.data.documentId} with failure status in DB`);
+        } catch (dbError: any) {
+          this.logger.error(
+            `Failed to update failure state for document ${job.data.documentId}: ${dbError.message}`,
+          );
+        }
+      }
+
       throw error;
     }
   }

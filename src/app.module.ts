@@ -2,6 +2,7 @@
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
@@ -10,6 +11,7 @@ import awsConfig from './config/aws.config.js';
 import redisConfig from './config/redis.config.js';
 import { AwsModule } from './shared/infrastructure/aws/aws.module.js';
 import { OcrModule } from './domains/ocr/ocr.module.js';
+import { ReconciliationModule } from './domains/reconciliation/reconciliation.module.js';
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { OcrModule } from './domains/ocr/ocr.module.js';
       isGlobal: true,
       load: [redisConfig, awsConfig],
     }),
+
+    ScheduleModule.forRoot(),
 
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -49,6 +53,7 @@ import { OcrModule } from './domains/ocr/ocr.module.js';
 
     AwsModule,
     OcrModule,
+    ReconciliationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

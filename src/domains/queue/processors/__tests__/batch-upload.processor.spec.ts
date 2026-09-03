@@ -57,6 +57,7 @@ describe('BatchUploadProcessor', () => {
     mockDocRepo = {
       create: jest.fn((dto) => ({ id: `doc-${Math.random()}`, ...dto })),
       save: jest.fn((entity) => Promise.resolve(entity)),
+      update: jest.fn().mockResolvedValue({ affected: 1 }),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -87,6 +88,7 @@ describe('BatchUploadProcessor', () => {
       const mockJob = {
         data: {
           transactionId: 'tx-100',
+          transactionServiceId: 'tx-srv-100',
           serviceId: 'srv-1',
           userId: 'user-1',
           s3Key: 'composite.pdf',
@@ -104,6 +106,33 @@ describe('BatchUploadProcessor', () => {
       expect(mockS3Service.uploadFile).toHaveBeenCalledTimes(2);
       expect(mockDocRepo.save).toHaveBeenCalledTimes(2);
       expect(mockOcrQueue.add).toHaveBeenCalledTimes(2);
+    });
+
+    it('should gracefully update parent document state on processing failure', async () => {
+      mockS3Service.downloadFile.mockRejectedValueOnce(new Error('S3 download network error'));
+
+      const mockJob = {
+        data: {
+          documentId: 'parent-doc-123',
+          transactionId: 'tx-100',
+          userId: 'user-1',
+          s3Key: 'composite.pdf',
+          fileName: 'composite.pdf',
+          fileSize: 10000,
+          fileType: 'application/pdf',
+        },
+      } as unknown as Job;
+
+      await expect(processor.process(mockJob)).rejects.toThrow('S3 download network error');
+
+      expect(mockDocRepo.update).toHaveBeenCalledWith(
+        'parent-doc-123',
+        expect.objectContaining({
+          ocrProcessed: true,
+          ocrProcessFailedReason: expect.stringContaining('Composite OCR processing failed'),
+          notes: 'OCR - Failed',
+        }),
+      );
     });
   });
 });
