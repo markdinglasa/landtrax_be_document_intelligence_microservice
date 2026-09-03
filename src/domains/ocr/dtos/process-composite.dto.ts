@@ -10,6 +10,14 @@ export class ProcessCompositeBatchDto {
   serviceId?: string | null;
 
   @IsString()
+  @IsOptional()
+  transactionServiceId?: string | null;
+
+  @IsString()
+  @IsOptional()
+  documentId?: string | null;
+
+  @IsString()
   @IsNotEmpty()
   userId!: string;
 

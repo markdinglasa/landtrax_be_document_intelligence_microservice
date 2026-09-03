@@ -27,7 +27,45 @@ async function bootstrap() {
     },
   });
 
-  await app.startAllMicroservices();
+  const isKafkaEnabled = process.env.KAFKA_ENABLED !== 'false';
+
+  if (isKafkaEnabled) {
+    const kafkaBrokers = (process.env.KAFKA_BROKERS || 'localhost:9092')
+      .split(',')
+      .map((b) => b.trim())
+      .filter(Boolean);
+
+    app.connectMicroservice<MicroserviceOptions>({
+      transport: Transport.KAFKA,
+      options: {
+        client: {
+          brokers: kafkaBrokers,
+          clientId: process.env.KAFKA_CLIENT_ID || 'document-intelligence-microservice',
+          retry: {
+            retries: 10,
+            initialRetryTime: 300,
+            maxRetryTime: 5000,
+          },
+        },
+        consumer: {
+          groupId: process.env.KAFKA_GROUP_ID || 'document-intelligence-consumer',
+          allowAutoTopicCreation: true,
+        },
+        subscribe: {
+          fromBeginning: false,
+        },
+      },
+    });
+  }
+
+  try {
+    await app.startAllMicroservices();
+  } catch (error: unknown) {
+    console.warn(
+      `Warning: Failed to start one or more microservice transports: ${(error as Error)?.message}`,
+    );
+  }
+
   await app.listen(httpPort);
 
   console.log(
